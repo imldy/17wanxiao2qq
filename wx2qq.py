@@ -23,7 +23,10 @@ class WanXiao():
         self.session = requests.session()
 
     def login(self):
-        self.session.post("http://reported.17wanxiao.com/login.html")
+        # 请求登录页面，获取一些cookie
+        self.session.get("https://reported.17wanxiao.com/login.html")
+        # 请求验证码图片，获取一些cookie，实际一段时间内第一次登录用不到输入验证码
+        self.session.get("https://reported.17wanxiao.com/captcha.jpg?t=13")
         login_url = "{}admin/login".format(self.wx_root_url)
         data = {
             "username": self.username,
