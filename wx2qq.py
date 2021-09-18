@@ -45,12 +45,12 @@ class WanXiao():
             "undo": 0,
             "reportTime": "",
             "_search": "false",
-            "nd": 1631956327043,  # 截至时间
+            # "nd": 1631956327043,  # 截至时间
             "limit": 50,
             "page": 1,
             "sidx": "",
             "order": "asc",
-            "_": 1631956326256
+            # "_": 1631956326256
         }
         resp = self.session.get(url, params=args)
         print(resp.text)
