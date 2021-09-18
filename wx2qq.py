@@ -54,6 +54,14 @@ class WanXiao():
         }
         resp = self.session.get(url, params=args)
         print(resp.text)
+        if '"result":true,' in resp.text:
+            resp_dict = resp.json()
+            no_check_stu_list = []
+            for record in resp_dict["page"]["records"]:
+                no_check_stu_list.append(Student(record["stuNo"], record["name"], None, 0))
+            return no_check_stu_list
+        else:
+            print("获取失败")
         # return [Student(), Student()]
 
 
@@ -114,13 +122,46 @@ class QQBot():
         return msg
 
 
+def is_no_check(stu, stu_list):
+    '''
+    检查某学生是否再一个学生列表内
+    :param stu:
+    :param stu_list:
+    :return:
+    '''
+    for s in stu_list:
+        if stu.id == s.id:
+            return True
+    return False
+
+
 if __name__ == '__main__':
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
+    # 将学生表格加载至内存
+    lines = open("stu_table.csv", encoding="utf-8").readlines()
+    all_stu = []
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        all_stu.append(Student(fields[0], fields[1], fields[2], fields[3]))
+        # print(fields)
+
+    # 从完美校园后台获取未提交学生列表，但是信息不全
     wx = WanXiao(conf["wx_account"]["username"], conf["wx_account"]["password"])
     wx.login()
-    wx.get_no_check_stu_list()
-    # stu_1 = Student(202104241307, "李德银", 2310819457, 0)
+    no_check_stu_list = wx.get_no_check_stu_list()
+
+    # 再从信息比较全的学生列表中拿出未打卡学生列表
+    no_check_stu_list2 = []
+    for stu in all_stu:
+        # 如果此人确实没有打卡
+        if is_no_check(stu, no_check_stu_list):
+            # stu_1 = Student(202104241307, "李德银", 2310819457, 0)
+            no_check_stu_list2.append(stu)
+
+    for i in no_check_stu_list2:
+        print("i.id:{},i.name:{},i.qq:{},i.ignore:{}".format(i.id, i.name, i.qq, i.ignore))
+
     # stu_2 = Student(202104241306, "李德银", 3055325847, 0)
     # no_check_stu_list = [stu_1, stu_2]
     #
