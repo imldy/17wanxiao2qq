@@ -165,8 +165,8 @@ if __name__ == '__main__':
     # stu_2 = Student(202104241306, "李德银", 3055325847, 0)
     # no_check_stu_list = [stu_1, stu_2]
     #
-    # # QQ推送相关
-    # qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
-    # qqbot.verify()
-    # qqbot.bind()
-    # qqbot.send_group_message(no_check_stu_list)
+    # QQ推送相关
+    qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
+    qqbot.verify()
+    qqbot.bind()
+    qqbot.send_group_message(no_check_stu_list2)
