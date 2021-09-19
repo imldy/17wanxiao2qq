@@ -113,8 +113,8 @@ class QQBot():
         msg = json.loads(resp.text)["msg"]
         return msg
 
-    def send_group_message_at_list(self, stu_list):
-        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请以下同学及时完成：".format(no=len(stu_list))}
+    def send_group_message_at_list(self, number, stu_list):
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请以下同学及时完成：".format(no=number)}
         new_line = {"type": "Plain", "text": "\n"}
         # 需要@的QQ列表，组成messageChain
         at_msg_list = []
@@ -203,6 +203,7 @@ if __name__ == '__main__':
             qqbot.send_group_message_text(no_check_num)
         else:
             # 列出名单，at单人
-            qqbot.send_group_message_at_list(no_check_stu_list2)
+            # 传入包含忽略的未打卡人数，并传入不包含忽略的未打卡列表
+            qqbot.send_group_message_at_list(no_check_num, no_check_stu_list2)
     else:
         print("均已健康打卡")
