@@ -101,15 +101,7 @@ class QQBot():
         msg = json.loads(resp.text)["msg"]
         return msg
 
-    def send_group_message(self, stu_list):
-        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请以下同学及时完成：".format(no=len(stu_list))}
-        new_line = {"type": "Plain", "text": "\n"}
-        # 需要@的QQ列表，组成messageChain
-        at_msg_list = []
-        for stu in stu_list:
-            at_msg_list.append({"type": "At", "target": stu.qq})
-            at_msg_list.append(new_line)
-        messageChain = [head_text, new_line] + at_msg_list
+    def send_group_message(self, messageChain):
         data = {
             "sessionKey": self.session_key,
             "target": self.dest_group_no,
@@ -120,6 +112,17 @@ class QQBot():
         print(resp.text)
         msg = json.loads(resp.text)["msg"]
         return msg
+
+    def send_group_message_at_list(self, stu_list):
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请以下同学及时完成：".format(no=len(stu_list))}
+        new_line = {"type": "Plain", "text": "\n"}
+        # 需要@的QQ列表，组成messageChain
+        at_msg_list = []
+        for stu in stu_list:
+            at_msg_list.append({"type": "At", "target": stu.qq})
+            at_msg_list.append(new_line)
+        messageChain = [head_text, new_line] + at_msg_list
+        return self.send_group_message(messageChain)
 
 
 def is_no_check(stu, stu_list):
@@ -171,6 +174,6 @@ if __name__ == '__main__':
         qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
         qqbot.verify()
         qqbot.bind()
-        qqbot.send_group_message(no_check_stu_list2)
+        qqbot.send_group_message_at_list(no_check_stu_list2)
     else:
         print("均已健康打卡")
