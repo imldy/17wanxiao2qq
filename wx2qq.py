@@ -102,7 +102,7 @@ class QQBot():
         return msg
 
     def send_group_message(self, stu_list):
-        head_text = {"type": "Plain", "text": "请以下同学及时健康打卡："}
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请以下同学及时完成：".format(no=len(stu_list))}
         new_line = {"type": "Plain", "text": "\n"}
         # 需要@的QQ列表，组成messageChain
         at_msg_list = []
@@ -159,6 +159,7 @@ if __name__ == '__main__':
             # stu_1 = Student(202104241307, "李德银", 2310819457, 0)
             no_check_stu_list2.append(stu)
 
+    print("当前未打卡的人数{}".format(len(no_check_stu_list2)))
     for i in no_check_stu_list2:
         print("i.id:{},i.name:{},i.qq:{},i.ignore:{}".format(i.id, i.name, i.qq, i.ignore))
 
