@@ -124,6 +124,19 @@ class QQBot():
         messageChain = [head_text, new_line] + at_msg_list
         return self.send_group_message(messageChain)
 
+    def send_group_message_at_all(self, number):
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请及时完成：".format(no=number)}
+        at_all = {"type": "AtAll"}
+        # 需要@的QQ列表，组成messageChain
+        messageChain = [head_text, at_all]
+        return self.send_group_message(messageChain)
+
+    def send_group_message_text(self, number):
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请及时完成：".format(no=number)}
+        # 需要@的QQ列表，组成messageChain
+        messageChain = [head_text]
+        return self.send_group_message(messageChain)
+
 
 def is_no_check(stu, stu_list):
     '''
@@ -177,11 +190,19 @@ if __name__ == '__main__':
     # stu_2 = Student(202104241306, "李德银", 3055325847, 0)
     # no_check_stu_list = [stu_1, stu_2]
     #
-    if len(no_check_stu_list2) > 0:
+    if no_check_no_ignore_num > 0:
         # QQ推送相关
         qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
         qqbot.verify()
         qqbot.bind()
-        qqbot.send_group_message_at_list(no_check_stu_list2)
+        if no_check_no_ignore_num > 35:
+            # 不列出名单，直接at全体成员
+            qqbot.send_group_message_at_all(no_check_num)
+        elif no_check_no_ignore_num > 20:
+            # 不列出名单，也不at，仅文字提醒
+            qqbot.send_group_message_text(no_check_num)
+        else:
+            # 列出名单，at单人
+            qqbot.send_group_message_at_list(no_check_stu_list2)
     else:
         print("均已健康打卡")
