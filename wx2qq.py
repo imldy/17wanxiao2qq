@@ -155,12 +155,20 @@ if __name__ == '__main__':
     no_check_stu_list = wx.get_no_check_stu_list()
 
     # 再从信息比较全的学生列表中拿出未打卡学生列表
+    # 没打卡
+    no_check_num = 0
+    # 没打卡也没有设置为忽略
+    no_check_no_ignore_num = 0
     no_check_stu_list2 = []
     for stu in all_stu:
         # 如果此人确实没有打卡
         if is_no_check(stu, no_check_stu_list):
             # stu_1 = Student(202104241307, "李德银", 2310819457, 0)
-            no_check_stu_list2.append(stu)
+            no_check_num += 1  # 因为有人是忽略提醒，所以这里累加的数值可能比需要提醒的要多
+            # 不忽略，才加入
+            if stu.ignore != True:
+                no_check_no_ignore_num += 1
+                no_check_stu_list2.append(stu)
 
     print("当前未打卡的人数{}".format(len(no_check_stu_list2)))
     for i in no_check_stu_list2:
