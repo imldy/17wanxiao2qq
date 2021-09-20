@@ -114,7 +114,7 @@ class QQBot():
         return msg
 
     def send_group_message_at_list(self, number, stu_list):
-        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请以下同学及时完成：".format(no=number)}
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今日健康打卡，请以下同学及时完成：".format(no=number)}
         new_line = {"type": "Plain", "text": "\n"}
         # 需要@的QQ列表，组成messageChain
         at_msg_list = []
@@ -125,14 +125,14 @@ class QQBot():
         return self.send_group_message(messageChain)
 
     def send_group_message_at_all(self, number):
-        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请及时完成：".format(no=number)}
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今日健康打卡，请及时完成。".format(no=number)}
         at_all = {"type": "AtAll"}
         # 需要@的QQ列表，组成messageChain
         messageChain = [head_text, at_all]
         return self.send_group_message(messageChain)
 
     def send_group_message_text(self, number):
-        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今天的健康打卡，请及时完成：".format(no=number)}
+        head_text = {"type": "Plain", "text": "目前有{no}名同学未完成今日健康打卡，请及时完成。".format(no=number)}
         # 需要@的QQ列表，组成messageChain
         messageChain = [head_text]
         return self.send_group_message(messageChain)
