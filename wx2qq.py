@@ -33,7 +33,7 @@ class WanXiao():
             "securitycode": self.passward
         }
         resp = self.session.post(login_url, data=data)
-        print(resp.text)
+        # print(resp.text)
         if resp.status_code == 200:
             return True
         return False
@@ -53,7 +53,7 @@ class WanXiao():
             # "_": 1631956326256
         }
         resp = self.session.get(url, params=args)
-        print(resp.text)
+        # print(resp.text)
         if '"result":true,' in resp.text:
             resp_dict = resp.json()
             no_check_stu_list = []
@@ -107,9 +107,9 @@ class QQBot():
             "target": self.dest_group_no,
             "messageChain": messageChain
         }
-        print(data)
+        # print(data)
         resp = requests.post("{}/sendGroupMessage".format(self.root_url), json=data)
-        print(resp.text)
+        # print(resp.text)
         msg = json.loads(resp.text)["msg"]
         return msg
 
