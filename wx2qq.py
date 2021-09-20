@@ -151,7 +151,7 @@ def is_no_check(stu, stu_list):
     return False
 
 
-if __name__ == '__main__':
+def start():
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
     # 将学生表格加载至内存
@@ -207,3 +207,7 @@ if __name__ == '__main__':
             qqbot.send_group_message_at_list(no_check_num, no_check_stu_list2)
     else:
         print("均已健康打卡")
+
+
+if __name__ == '__main__':
+    start()
