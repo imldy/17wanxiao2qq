@@ -183,7 +183,7 @@ if __name__ == '__main__':
                 no_check_no_ignore_num += 1
                 no_check_stu_list2.append(stu)
 
-    print("当前未打卡的人数{}".format(len(no_check_stu_list2)))
+    print("当前未打卡的人数{}，当前需要提醒的人数{}".format(no_check_num, no_check_no_ignore_num))
     for i in no_check_stu_list2:
         print("i.id:{},i.name:{},i.qq:{},i.ignore:{}".format(i.id, i.name, i.qq, i.ignore))
 
