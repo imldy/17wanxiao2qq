@@ -159,7 +159,7 @@ if __name__ == '__main__':
     all_stu = []
     for line in lines[1:]:
         fields = line.strip().split(",")
-        all_stu.append(Student(fields[0], fields[1], fields[2], fields[3]))
+        all_stu.append(Student(fields[0], fields[1], fields[2], int(fields[3])))
         # print(fields)
 
     # 从完美校园后台获取未提交学生列表，但是信息不全
