@@ -209,5 +209,9 @@ def start():
         print("均已健康打卡")
 
 
+def SCF_start(event, context):
+    start()
+
+
 if __name__ == '__main__':
     start()
