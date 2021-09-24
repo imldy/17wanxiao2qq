@@ -137,6 +137,12 @@ class QQBot():
         messageChain = [head_text]
         return self.send_group_message(messageChain)
 
+    def send_group_message_custom_text(self, text):
+        head_text = {"type": "Plain", "text": text}
+        # 需要@的QQ列表，组成messageChain
+        messageChain = [head_text]
+        return self.send_group_message(messageChain)
+
 
 def is_no_check(stu, stu_list):
     '''
@@ -212,19 +218,32 @@ def get_all_stu(conf_path):
     return all_stu
 
 
-def start():
+def push_one_day_three_detection_remind_to_group(conf):
+    qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
+    qqbot.verify()
+    qqbot.bind()
+    qqbot.send_group_message_custom_text("关于一日三检表：麻烦大家按时测温并如实填写，双周周末上交。💖🎉")
+
+
+def start(health_checkin=False, one_day_three_detection=False):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
-    # 将学生表格加载至内存
-    all_stu = get_all_stu("stu_table.csv")
+    if health_checkin:
+        print("开始健康打卡提醒")
+        # 将学生表格加载至内存
+        all_stu = get_all_stu("stu_table.csv")
 
-    no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
-    push_to_group(no_check_stu_list, all_stu, conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
+        no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
+        push_to_group(no_check_stu_list, all_stu, conf["root_url"], conf["verify_key"], conf["dest_group"],
+                      conf["bot_qq"])
+    if one_day_three_detection:
+        print("开始一日三检表提醒")
+        push_one_day_three_detection_remind_to_group(conf)
 
 
 def SCF_start(event, context):
-    start()
+    start(health_checkin=True)
 
 
 if __name__ == '__main__':
-    start()
+    start(health_checkin=True)
