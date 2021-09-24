@@ -202,16 +202,21 @@ def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, 
         print("均已健康打卡")
 
 
-def start():
-    print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
-    conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
-    # 将学生表格加载至内存
-    lines = open("stu_table.csv", encoding="utf-8").readlines()
+def get_all_stu(conf_path):
+    lines = open(conf_path, encoding="utf-8").readlines()
     all_stu = []
     for line in lines[1:]:
         fields = line.strip().split(",")
         all_stu.append(Student(fields[0], fields[1], fields[2], int(fields[3])))
         # print(fields)
+    return all_stu
+
+
+def start():
+    print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
+    conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
+    # 将学生表格加载至内存
+    all_stu = get_all_stu("stu_table.csv")
 
     no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
     push_to_group(no_check_stu_list, all_stu, conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
