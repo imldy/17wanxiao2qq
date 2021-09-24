@@ -1,6 +1,6 @@
 import requests
 import json
-
+import sys
 import yaml
 
 
@@ -242,8 +242,38 @@ def start(health_checkin=False, one_day_three_detection=False):
 
 
 def SCF_start(event, context):
-    start(health_checkin=True)
+    # 判断是否含有Message键，如果有就判断并开启某项功能，没有就启用默认选项：提醒健康打卡
+    if event.__contains__("Message"):
+        # 相关选项置默认为关闭
+        health_checkin = False
+        one_day_three_detection = False
+
+        # 如果信息里面由包含相关选项，就启动
+        if "健康打卡" in event["Message"].split(","):
+            print("开始健康打卡提醒")
+            health_checkin = True
+        if "一日三检表" in event["Message"].split(","):
+            print("开始一日三检表提醒")
+            one_day_three_detection = True
+
+        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection)
+    else:
+        start(health_checkin=True)
 
 
 if __name__ == '__main__':
-    start(health_checkin=True)
+    args = sys.argv
+    # 判断是否输入了别的启动参数，如果有就判断并开启某项功能，没有就启用默认选项：提醒健康打卡
+    if len(args) > 1:
+        # 相关选项置默认为关闭
+        health_checkin = False
+        one_day_three_detection = False
+        if "健康打卡" in args[1:]:
+            print("开始健康打卡提醒")
+            health_checkin = True
+        if "一日三检表" in args[1:]:
+            print("开始一日三检表提醒")
+            one_day_three_detection = True
+        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection)
+    else:
+        start(health_checkin=True)
