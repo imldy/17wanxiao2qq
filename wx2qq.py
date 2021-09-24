@@ -151,22 +151,15 @@ def is_no_check(stu, stu_list):
     return False
 
 
-def start():
-    print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
-    conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
-    # 将学生表格加载至内存
-    lines = open("stu_table.csv", encoding="utf-8").readlines()
-    all_stu = []
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        all_stu.append(Student(fields[0], fields[1], fields[2], int(fields[3])))
-        # print(fields)
-
+def get_no_check_stu_list(wx_username, wx_password):
     # 从完美校园后台获取未提交学生列表，但是信息不全
-    wx = WanXiao(conf["wx_account"]["username"], conf["wx_account"]["password"])
+    wx = WanXiao(wx_username, wx_password)
     wx.login()
     no_check_stu_list = wx.get_no_check_stu_list()
+    return no_check_stu_list
 
+
+def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, bot_qq):
     # 再从信息比较全的学生列表中拿出未打卡学生列表
     # 没打卡
     no_check_num = 0
@@ -192,7 +185,7 @@ def start():
     #
     if no_check_no_ignore_num > 0:
         # QQ推送相关
-        qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
+        qqbot = QQBot(root_url, verify_key, dest_group, bot_qq)
         qqbot.verify()
         qqbot.bind()
         if no_check_no_ignore_num > 35:
@@ -207,6 +200,21 @@ def start():
             qqbot.send_group_message_at_list(no_check_num, no_check_stu_list2)
     else:
         print("均已健康打卡")
+
+
+def start():
+    print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
+    conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
+    # 将学生表格加载至内存
+    lines = open("stu_table.csv", encoding="utf-8").readlines()
+    all_stu = []
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        all_stu.append(Student(fields[0], fields[1], fields[2], int(fields[3])))
+        # print(fields)
+
+    no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
+    push_to_group(no_check_stu_list, all_stu, conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
 
 
 def SCF_start(event, context):
