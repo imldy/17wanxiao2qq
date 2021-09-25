@@ -280,7 +280,7 @@ def str_to_date(str: str):
     return date(int(year_s), int(mon_s), int(day_s))
 
 
-def get_boy_dormitory_today_clean_stu_list():
+def get_boy_dormitory_clean_stu_list_of_date(date: date):
     '''
     获取今日值日生列表
     :return:
@@ -292,24 +292,24 @@ def get_boy_dormitory_today_clean_stu_list():
         start_date = str_to_date(fields[0])
         end_date = str_to_date(fields[1])
         # 判断是否在之间
-        if start_date <= date.today() <= end_date:
-            print("{}介于{}和{}之间".format(date.today(), start_date, end_date))
+        if start_date <= date <= end_date:
+            print("{}介于{}和{}之间".format(date, start_date, end_date))
             dormitory_id = fields[2]
             return get_stu_list_of_dormitory_id(dormitory_id)
 
 
-def get_girl_dormitory_today_clean_stu_list():
+def get_girl_dormitory_clean_stu_list_of_date(date: date):
     lines = open("duty_table/girl_dormitory.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
         date1 = str_to_date(fields[0])
-        if date1 == date.today():
+        if date1 == date:
             group_id = fields[1]
             return get_stu_list_of_group_id(group_id)
 
 
-def get_classroom_today_clean_stu_list():
+def get_classroom_clean_stu_list_of_date(date: date):
     '''
     获取今日值日生列表
     :return: 学生姓名列表
@@ -321,8 +321,8 @@ def get_classroom_today_clean_stu_list():
         start_date = str_to_date(fields[0])
         end_date = str_to_date(fields[1])
         # 判断是否在之间
-        if start_date <= date.today() <= end_date:
-            print("{}介于{}和{}之间".format(date.today(), start_date, end_date))
+        if start_date <= date <= end_date:
+            print("{}介于{}和{}之间".format(date, start_date, end_date))
             # 如果是多个宿舍，取出宿舍号
             dormitory_ids = fields[2].strip().split("+")
             stu_list_of_dormitory_id = []
@@ -364,8 +364,9 @@ def push_one_day_three_detection_remind_to_group(conf):
 
 
 def push_dormitory_remind_to_group(conf, qqbot, option):
-    boy_dormitory_today_clean_stu_list = get_boy_dormitory_today_clean_stu_list()
-    girl_dormitory_today_clean_stu_list = get_girl_dormitory_today_clean_stu_list()
+    today = date.today()
+    boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
+    girl_dormitory_today_clean_stu_list = get_girl_dormitory_clean_stu_list_of_date(today)
     if ((boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None)) \
             or (len(boy_dormitory_today_clean_stu_list) == 0 and len(girl_dormitory_today_clean_stu_list) == 0):
         print("今日男生女生公寓人员都为无")
@@ -409,7 +410,8 @@ def push_classroom_remind(conf, qqbot, option):
     :param option:
     :return:
     '''
-    classroom_today_clean_stu_name_list = get_classroom_today_clean_stu_list()
+    today = date.today()
+    classroom_today_clean_stu_name_list = get_classroom_clean_stu_list_of_date(today)
     all_stu = get_all_stu("stu_table.csv")
     stu_qq_list = get_qq_list_of_name_list(all_stu, classroom_today_clean_stu_name_list)
     qqbot.send_group_message_custom_text_custom_at_qq_list(conf[option]["remind_text"], stu_qq_list)
