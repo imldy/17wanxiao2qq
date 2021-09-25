@@ -374,17 +374,17 @@ def push_dormitory_remind_to_group(conf, qqbot, option):
 
     all_stu = get_all_stu("stu_table.csv")
     if boy_dormitory_today_clean_stu_list != None:
-        bot_qq_list = get_qq_list_of_name_list(all_stu, boy_dormitory_today_clean_stu_list)
+        boy_qq_list = get_qq_list_of_name_list(all_stu, boy_dormitory_today_clean_stu_list)
     else:
         print("男生值日人员为空")
-        bot_qq_list = None
+        boy_qq_list = None
     if girl_dormitory_today_clean_stu_list != None:
         girl_qq_list = get_qq_list_of_name_list(all_stu, girl_dormitory_today_clean_stu_list)
     else:
         print("女生值日人员为空")
         girl_qq_list = None
     qqbot.send_group_message_custom_text_custom_at_qq_list_2(conf[option]["remind_text"],
-                                                             bot_qq_list,
+                                                             boy_qq_list,
                                                              girl_qq_list)
 
 
