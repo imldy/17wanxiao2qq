@@ -1,3 +1,5 @@
+from datetime import date
+
 import requests
 import json
 import sys
@@ -143,6 +145,37 @@ class QQBot():
         messageChain = [head_text]
         return self.send_group_message(messageChain)
 
+    def send_group_message_custom_text_custom_at_qq_list(self, text, qq_list):
+        head_text = {"type": "Plain", "text": text + "\n"}
+        # 需要@的QQ列表，组成messageChain
+        at_msg_list = []
+        for qq in qq_list:
+            at_msg_list.append({"type": "At", "target": qq})
+            at_msg_list.append(qq_list)
+        messageChain = [head_text] + at_msg_list
+        return self.send_group_message(messageChain)
+
+    def send_group_message_custom_text_custom_at_qq_list_2(self, text, boy_qq_list, girl_qq_list):
+        head_text = {"type": "Plain", "text": text}
+        new_line = {"type": "Plain", "text": "\n"}
+        messageChain = [head_text, new_line]
+        # 需要@的QQ列表，组成messageChain
+        if len(boy_qq_list) > 0:
+            boy_text = {"type": "Plain", "text": "男生公寓："}
+            at_msg_list = []
+            for qq in boy_qq_list:
+                at_msg_list.append({"type": "At", "target": qq})
+                at_msg_list.append(new_line)
+            messageChain = messageChain + [boy_text, new_line] + at_msg_list
+        if len(girl_qq_list) > 0:
+            girl_text = {"type": "Plain", "text": "女生公寓："}
+            at_msg_list = []
+            for qq in girl_qq_list:
+                at_msg_list.append({"type": "At", "target": qq})
+                at_msg_list.append(new_line)
+            messageChain = messageChain + [girl_text, new_line] + at_msg_list
+        return self.send_group_message(messageChain)
+
 
 def is_no_check(stu, stu_list):
     '''
@@ -218,6 +251,110 @@ def get_all_stu(conf_path):
     return all_stu
 
 
+def get_stu_list_of_dormitory_id(dormitory_id: str):
+    '''
+    根据宿舍号获取宿舍内的人员名单，以姓名列表形式返回
+    :param dormitory_id:
+    :return:姓名列表
+    '''
+    lines = open("table/dormitory_stu_table.csv").readlines()
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
+        if fields[0] == dormitory_id:
+            return fields[1].strip().split("、")
+
+
+def get_stu_list_of_group_id(group_id: str):
+    lines = open("table/group_stu_table.csv.csv").readlines()
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
+        if fields[0] == group_id:
+            return fields[1].strip().split("、")
+
+
+def str_to_date(str: str):
+    year_s, mon_s, day_s = str.split('-')
+    return date(int(year_s), int(mon_s), int(day_s))
+
+
+def get_boy_dormitory_today_clean_stu_list():
+    '''
+    获取今日值日生列表
+    :return:
+    '''
+    lines = open("duty_table/boy_dormitory.csv").readlines()
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        # 获取日期字段，转为date类型
+        start_date = str_to_date(fields[0])
+        end_date = str_to_date(fields[1])
+        # 判断是否在之间
+        if start_date <= date.today() <= end_date:
+            print("介于之间")
+            dormitory_id = fields[2]
+            return get_stu_list_of_dormitory_id(dormitory_id)
+
+
+def get_girl_dormitory_today_clean_stu_list():
+    lines = open("duty_table/girl_dormitory.csv").readlines()
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        # 获取日期字段，转为date类型
+        date1 = str_to_date(fields[0])
+        if date1 == date.today():
+            group_id = fields[1]
+            return get_stu_list_of_group_id(group_id)
+
+
+def get_classroom_today_clean_stu_list():
+    '''
+    获取今日值日生列表
+    :return: 学生姓名列表
+    '''
+    lines = open("duty_table/classroom.csv").readlines()
+    for line in lines[1:]:
+        fields = line.strip().split(",")
+        # 获取日期字段，转为date类型
+        start_date = str_to_date(fields[0])
+        end_date = str_to_date(fields[1])
+        # 判断是否在之间
+        if start_date <= date.today() <= end_date:
+            print("介于之间")
+            # 如果是多个宿舍，取出宿舍号
+            dormitory_ids = fields[2].strip().split("+")
+            stu_list_of_dormitory_id = []
+            for dormitory_id in dormitory_ids:
+                stu_list_of_dormitory_id += get_stu_list_of_dormitory_id(dormitory_id)
+            return stu_list_of_dormitory_id
+
+
+def get_qq_of_name(all_stu, name):
+    '''
+    根据学生（stu）对象列表，返回姓名对应的qq号
+    :param all_stu:
+    :param name:
+    :return:
+    '''
+    for stu in all_stu:
+        if name == stu.name:
+            return stu.qq
+
+
+def get_qq_list_of_name_list(all_stu, name_list):
+    '''
+    根据学生（stu）对象列表，返回姓名列表对应的qq号列表
+    :param all_stu:
+    :param name_list:
+    :return:
+    '''
+    qq_list = []
+    for name in name_list:
+        qq_list.append(get_qq_of_name(all_stu, name))
+    return qq_list
+
+
 def push_one_day_three_detection_remind_to_group(conf):
     qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
     qqbot.verify()
@@ -225,9 +362,107 @@ def push_one_day_three_detection_remind_to_group(conf):
     qqbot.send_group_message_custom_text("关于一日三检表：麻烦大家按时测温并如实填写，双周周末上交。💖🎉")
 
 
-def start(health_checkin=False, one_day_three_detection=False):
+def push_dormitory_remind_to_group(conf, qqbot, option):
+    boy_dormitory_today_clean_stu_list = get_boy_dormitory_today_clean_stu_list()
+    girl_dormitory_today_clean_stu_list = get_girl_dormitory_today_clean_stu_list()
+    if len(boy_dormitory_today_clean_stu_list) == 0 and len(girl_dormitory_today_clean_stu_list) == 0:
+        print("今日男生女生公寓人员都为无")
+        return None
+
+    all_stu = get_all_stu("stu_table.csv")
+    bot_qq_list = get_qq_list_of_name_list(all_stu, boy_dormitory_today_clean_stu_list)
+    girl_qq_list = get_qq_list_of_name_list(all_stu, girl_dormitory_today_clean_stu_list)
+    qqbot.send_group_message_custom_text_custom_at_qq_list_2(conf[option]["remind_text"],
+                                                             bot_qq_list,
+                                                             girl_qq_list)
+
+
+def push_dormitory_clean_remind_to_group(conf, qqbot):
+    '''
+    【公寓卫生区打扫】提醒
+    :param conf:
+    :param qqbot:
+    :return:
+    '''
+    option = "dormitory_clean"
+    push_dormitory_remind_to_group(conf, qqbot, option)
+
+
+def push_dormitory_sign_remind_to_group(conf, qqbot):
+    '''
+    【公寓卫生区签到】签字提醒
+    :param conf:
+    :param qqbot:
+    :return:
+    '''
+    option = "dormitory_sign"
+    push_dormitory_remind_to_group(conf, qqbot, option)
+
+
+def push_classroom_remind(conf, qqbot, option):
+    '''
+    适用于教室打扫的提醒
+    :param conf:
+    :param qqbot:
+    :param option:
+    :return:
+    '''
+    classroom_today_clean_stu_name_list = get_classroom_today_clean_stu_list()
+    all_stu = get_all_stu("stu_table.csv")
+    stu_qq_list = get_qq_list_of_name_list(all_stu, classroom_today_clean_stu_name_list)
+    qqbot.send_group_message_custom_text_custom_at_qq_list(conf[option]["remind_text"], stu_qq_list)
+
+
+def push_after_class_clean_to_group(conf, qqbot):
+    '''
+    教室下课后提醒打扫 提醒
+    :param conf:
+    :param qqbot:
+    :return:
+    '''
+    option = "after_class_clean"
+    push_classroom_remind(conf, qqbot, option)
+
+
+def push_after_night_lessons_clean_to_group(conf, qqbot):
+    '''
+    自习室晚自习后打扫 提醒
+    :param conf:
+    :param qqbot:
+    :return:
+    '''
+    option = "after_night_lessons_clean"
+    push_classroom_remind(conf, qqbot, option)
+
+
+def push_important_clean_to_group(conf, qqbot):
+    '''
+    大扫除 提醒
+    :param conf:
+    :param qqbot:
+    :return:
+    '''
+    option = "important_clean"
+    push_classroom_remind(conf, qqbot, option)
+
+
+def getQQBot(conf):
+    qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
+    qqbot.verify()
+    qqbot.bind()
+    return qqbot
+
+
+def start(health_checkin=False, one_day_three_detection=False
+          , dormitory_clean=False
+          , dormitory_sign=False
+          , after_class_clean=False
+          , after_night_lessons_clean=False
+          , important_clean=False
+          ):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
+    qqbot = getQQBot(conf)
     if health_checkin:
         print("开始健康打卡提醒")
         # 将学生表格加载至内存
@@ -239,6 +474,21 @@ def start(health_checkin=False, one_day_three_detection=False):
     if one_day_three_detection:
         print("开始一日三检表提醒")
         push_one_day_three_detection_remind_to_group(conf)
+    if dormitory_clean:
+        print("开始【公寓卫生区打扫】提醒")
+        push_dormitory_clean_remind_to_group(conf, qqbot)
+    if dormitory_sign:
+        print("开始【公寓卫生区打扫后签到】提醒")
+        push_dormitory_sign_remind_to_group(conf, qqbot)
+    if after_class_clean:
+        print("开始【教室下课后提醒打扫】提醒")
+        push_after_class_clean_to_group(conf, qqbot)
+    if after_night_lessons_clean:
+        print("开始【自习室晚自习后打扫】提醒")
+        push_after_night_lessons_clean_to_group(conf, qqbot)
+    if important_clean:
+        print("开始【自习室晚大扫除】提醒")
+        push_important_clean_to_group(conf, qqbot)
 
 
 def SCF_start(event, context):
@@ -248,6 +498,16 @@ def SCF_start(event, context):
         # 相关选项置默认为关闭
         health_checkin = False
         one_day_three_detection = False
+        # 宿舍卫生区打扫
+        dormitory_clean = False
+        # 宿舍卫生区打扫完签字
+        dormitory_sign = False
+        # 教室下课后提醒打扫
+        after_class_clean = False
+        # 自习室晚自习后打扫
+        after_night_lessons_clean = False
+        # 大扫除
+        important_clean = False
 
         # 如果信息里面由包含相关选项，就启动
         if "健康打卡" in event["Message"].split(","):
@@ -256,8 +516,30 @@ def SCF_start(event, context):
         if "一日三检表" in event["Message"].split(","):
             print("开始一日三检表提醒")
             one_day_three_detection = True
+        if "公寓卫生区打扫" in event["Message"].split(","):
+            print("开始【公寓卫生区打扫】提醒")
+            dormitory_clean = True
+        if "公寓卫生区签到" in event["Message"].split(","):
+            print("开始【公寓卫生区签到】提醒")
+            dormitory_sign = True
+        if "教室下课后打扫" in event["Message"].split(","):
+            print("开始【教室下课后打扫】提醒")
+            after_class_clean = True
+        if "自习室放学后打扫" in event["Message"].split(","):
+            print("开始【自习室放学后打扫】提醒")
+            after_night_lessons_clean = True
+        if "大扫除" in event["Message"].split(","):
+            print("开始【自习室大扫除】提醒")
+            important_clean = True
 
-        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection)
+        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
+              , dormitory_clean=dormitory_clean
+              , dormitory_sign=dormitory_sign
+              , after_class_clean=after_class_clean
+              , after_night_lessons_clean=after_night_lessons_clean
+              , important_clean=important_clean
+              )
+
     else:
         print("未接收到Message，开始运行默认选项")
         start(health_checkin=True)
@@ -270,12 +552,44 @@ if __name__ == '__main__':
         # 相关选项置默认为关闭
         health_checkin = False
         one_day_three_detection = False
+        # 宿舍卫生区打扫
+        dormitory_clean = False
+        # 宿舍卫生区打扫完签字
+        dormitory_sign = False
+        # 教室下课后提醒打扫
+        after_class_clean = False
+        # 自习室晚自习后打扫
+        after_night_lessons_clean = False
+        # 大扫除
+        important_clean = False
         if "健康打卡" in args[1:]:
             print("开始健康打卡提醒")
             health_checkin = True
         if "一日三检表" in args[1:]:
             print("开始一日三检表提醒")
             one_day_three_detection = True
-        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection)
+        if "公寓卫生区打扫" in args[1:]:
+            print("开始【公寓卫生区打扫】提醒")
+            dormitory_clean = True
+        if "公寓卫生区签到" in args[1:]:
+            print("开始【公寓卫生区签到】提醒")
+            dormitory_sign = True
+        if "教室下课后打扫" in args[1:]:
+            print("开始【教室下课后打扫】提醒")
+            after_class_clean = True
+        if "自习室放学后打扫" in args[1:]:
+            print("开始【自习室放学后打扫】提醒")
+            after_night_lessons_clean = True
+        if "大扫除" in args[1:]:
+            print("开始【自习室大扫除】提醒")
+            important_clean = True
+
+        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
+              , dormitory_clean=dormitory_clean
+              , dormitory_sign=dormitory_sign
+              , after_class_clean=after_class_clean
+              , after_night_lessons_clean=after_night_lessons_clean
+              , important_clean=important_clean
+              )
     else:
         start(health_checkin=True)
