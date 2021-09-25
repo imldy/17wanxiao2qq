@@ -293,7 +293,7 @@ def get_boy_dormitory_today_clean_stu_list():
         end_date = str_to_date(fields[1])
         # 判断是否在之间
         if start_date <= date.today() <= end_date:
-            print("介于之间")
+            print("{}介于{}和{}之间".format(date.today(), start_date, end_date))
             dormitory_id = fields[2]
             return get_stu_list_of_dormitory_id(dormitory_id)
 
@@ -322,7 +322,7 @@ def get_classroom_today_clean_stu_list():
         end_date = str_to_date(fields[1])
         # 判断是否在之间
         if start_date <= date.today() <= end_date:
-            print("介于之间")
+            print("{}介于{}和{}之间".format(date.today(), start_date, end_date))
             # 如果是多个宿舍，取出宿舍号
             dormitory_ids = fields[2].strip().split("+")
             stu_list_of_dormitory_id = []
