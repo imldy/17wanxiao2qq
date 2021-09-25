@@ -257,7 +257,7 @@ def get_stu_list_of_dormitory_id(dormitory_id: str):
     :param dormitory_id:
     :return:姓名列表
     '''
-    lines = open("table/dormitory_stu_table.csv").readlines()
+    lines = open("table/dormitory_stu_table.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
@@ -266,7 +266,7 @@ def get_stu_list_of_dormitory_id(dormitory_id: str):
 
 
 def get_stu_list_of_group_id(group_id: str):
-    lines = open("table/group_stu_table.csv.csv").readlines()
+    lines = open("table/group_stu_table.csv.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
@@ -284,7 +284,7 @@ def get_boy_dormitory_today_clean_stu_list():
     获取今日值日生列表
     :return:
     '''
-    lines = open("duty_table/boy_dormitory.csv").readlines()
+    lines = open("duty_table/boy_dormitory.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
@@ -298,7 +298,7 @@ def get_boy_dormitory_today_clean_stu_list():
 
 
 def get_girl_dormitory_today_clean_stu_list():
-    lines = open("duty_table/girl_dormitory.csv").readlines()
+    lines = open("duty_table/girl_dormitory.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
@@ -313,7 +313,7 @@ def get_classroom_today_clean_stu_list():
     获取今日值日生列表
     :return: 学生姓名列表
     '''
-    lines = open("duty_table/classroom.csv").readlines()
+    lines = open("duty_table/classroom.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
