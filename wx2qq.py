@@ -543,7 +543,7 @@ def SCF_start(event, context):
         if "自习室放学后打扫" in event["Message"].split(","):
             print("开始【自习室放学后打扫】提醒")
             after_night_lessons_clean = True
-        if "大扫除" in event["Message"].split(","):
+        if "自习室大扫除" in event["Message"].split(","):
             print("开始【自习室大扫除】提醒")
             important_clean = True
 
@@ -595,7 +595,7 @@ if __name__ == '__main__':
         if "自习室放学后打扫" in args[1:]:
             print("开始【自习室放学后打扫】提醒")
             after_night_lessons_clean = True
-        if "大扫除" in args[1:]:
+        if "自习室大扫除" in args[1:]:
             print("开始【自习室大扫除】提醒")
             important_clean = True
 
