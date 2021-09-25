@@ -161,14 +161,14 @@ class QQBot():
         new_line = {"type": "Plain", "text": "\n"}
         messageChain = [head_text, new_line]
         # 需要@的QQ列表，组成messageChain
-        if len(boy_qq_list) > 0:
+        if boy_qq_list != None and len(boy_qq_list) > 0:
             boy_text = {"type": "Plain", "text": "男生公寓："}
             at_msg_list = []
             for qq in boy_qq_list:
                 at_msg_list.append({"type": "At", "target": qq})
                 at_msg_list.append(new_line)
             messageChain = messageChain + [boy_text, new_line] + at_msg_list
-        if len(girl_qq_list) > 0:
+        if girl_qq_list != None and len(girl_qq_list) > 0:
             girl_text = {"type": "Plain", "text": "女生公寓："}
             at_msg_list = []
             for qq in girl_qq_list:
@@ -373,8 +373,16 @@ def push_dormitory_remind_to_group(conf, qqbot, option):
         return None
 
     all_stu = get_all_stu("stu_table.csv")
-    bot_qq_list = get_qq_list_of_name_list(all_stu, boy_dormitory_today_clean_stu_list)
-    girl_qq_list = get_qq_list_of_name_list(all_stu, girl_dormitory_today_clean_stu_list)
+    if boy_dormitory_today_clean_stu_list != None:
+        bot_qq_list = get_qq_list_of_name_list(all_stu, boy_dormitory_today_clean_stu_list)
+    else:
+        print("男生值日人员为空")
+        bot_qq_list = None
+    if girl_dormitory_today_clean_stu_list != None:
+        girl_qq_list = get_qq_list_of_name_list(all_stu, girl_dormitory_today_clean_stu_list)
+    else:
+        print("女生值日人员为空")
+        girl_qq_list = None
     qqbot.send_group_message_custom_text_custom_at_qq_list_2(conf[option]["remind_text"],
                                                              bot_qq_list,
                                                              girl_qq_list)
@@ -413,8 +421,11 @@ def push_classroom_remind(conf, qqbot, option):
     today = date.today()
     classroom_today_clean_stu_name_list = get_classroom_clean_stu_list_of_date(today)
     all_stu = get_all_stu("stu_table.csv")
-    stu_qq_list = get_qq_list_of_name_list(all_stu, classroom_today_clean_stu_name_list)
-    qqbot.send_group_message_custom_text_custom_at_qq_list(conf[option]["remind_text"], stu_qq_list)
+    if classroom_today_clean_stu_name_list != None:
+        stu_qq_list = get_qq_list_of_name_list(all_stu, classroom_today_clean_stu_name_list)
+        qqbot.send_group_message_custom_text_custom_at_qq_list(conf[option]["remind_text"], stu_qq_list)
+    else:
+        print("今天值日人员为空")
 
 
 def push_after_class_clean_to_group(conf, qqbot):
