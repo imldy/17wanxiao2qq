@@ -366,7 +366,8 @@ def push_one_day_three_detection_remind_to_group(conf):
 def push_dormitory_remind_to_group(conf, qqbot, option):
     boy_dormitory_today_clean_stu_list = get_boy_dormitory_today_clean_stu_list()
     girl_dormitory_today_clean_stu_list = get_girl_dormitory_today_clean_stu_list()
-    if len(boy_dormitory_today_clean_stu_list) == 0 and len(girl_dormitory_today_clean_stu_list) == 0:
+    if ((boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None)) \
+            or (len(boy_dormitory_today_clean_stu_list) == 0 and len(girl_dormitory_today_clean_stu_list) == 0):
         print("今日男生女生公寓人员都为无")
         return None
 
