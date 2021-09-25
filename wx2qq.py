@@ -147,11 +147,12 @@ class QQBot():
 
     def send_group_message_custom_text_custom_at_qq_list(self, text, qq_list):
         head_text = {"type": "Plain", "text": text + "\n"}
+        new_line = {"type": "Plain", "text": "\n"}
         # 需要@的QQ列表，组成messageChain
         at_msg_list = []
         for qq in qq_list:
             at_msg_list.append({"type": "At", "target": qq})
-            at_msg_list.append(qq_list)
+            at_msg_list.append(new_line)
         messageChain = [head_text] + at_msg_list
         return self.send_group_message(messageChain)
 
