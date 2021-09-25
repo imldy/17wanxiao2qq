@@ -243,7 +243,8 @@ def start(health_checkin=False, one_day_three_detection=False):
 
 def SCF_start(event, context):
     # 判断是否含有Message键，如果有就判断并开启某项功能，没有就启用默认选项：提醒健康打卡
-    if event.__contains__("Message"):
+    if event.__contains__("Message") and (event["Message"] != None) and (event["Message"] != ""):
+        print("接收到Message：" + event["Message"])
         # 相关选项置默认为关闭
         health_checkin = False
         one_day_three_detection = False
@@ -258,6 +259,7 @@ def SCF_start(event, context):
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection)
     else:
+        print("未接收到Message，开始运行默认选项")
         start(health_checkin=True)
 
 
