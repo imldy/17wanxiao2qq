@@ -267,7 +267,7 @@ def get_stu_list_of_dormitory_id(dormitory_id: str):
 
 
 def get_stu_list_of_group_id(group_id: str):
-    lines = open("table/group_stu_table.csv.csv", encoding="utf-8").readlines()
+    lines = open("table/group_stu_table.csv", encoding="utf-8").readlines()
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
