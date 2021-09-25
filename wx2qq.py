@@ -461,7 +461,7 @@ def start(health_checkin=False, one_day_three_detection=False
           , important_clean=False
           ):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
-    conf = yaml.load(open("conf.yaml").read(), Loader=yaml.FullLoader)
+    conf = yaml.load(open("conf.yaml", encoding="utf-8").read(), Loader=yaml.FullLoader)
     qqbot = getQQBot(conf)
     if health_checkin:
         print("开始健康打卡提醒")
