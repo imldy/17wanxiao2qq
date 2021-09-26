@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
 
 import requests
 import json
@@ -176,6 +176,12 @@ class QQBot():
                 at_msg_list.append(new_line)
             messageChain = messageChain + [girl_text, new_line] + at_msg_list
         return self.send_group_message(messageChain)
+
+
+def today_utc_8_date() -> date:
+    tz_utc_8 = timezone(timedelta(hours=8))
+    utc_8_dt: datetime = datetime.now(timezone.utc).astimezone(tz_utc_8)
+    return utc_8_dt.date()
 
 
 def is_no_check(stu, stu_list):
@@ -364,7 +370,7 @@ def push_one_day_three_detection_remind_to_group(conf):
 
 
 def push_dormitory_remind_to_group(conf, qqbot, option):
-    today = date.today()
+    today = today_utc_8_date()
     boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
     girl_dormitory_today_clean_stu_list = get_girl_dormitory_clean_stu_list_of_date(today)
     if ((boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None)) \
@@ -418,7 +424,7 @@ def push_classroom_remind(conf, qqbot, option):
     :param option:
     :return:
     '''
-    today = date.today()
+    today = today_utc_8_date()
     classroom_today_clean_stu_name_list = get_classroom_clean_stu_list_of_date(today)
     all_stu = get_all_stu("stu_table.csv")
     if classroom_today_clean_stu_name_list != None:
