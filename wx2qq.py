@@ -369,8 +369,10 @@ def push_one_day_three_detection_remind_to_group(conf):
     qqbot.send_group_message_custom_text("关于一日三检表：麻烦大家按时测温并如实填写，双周周末上交。💖🎉")
 
 
-def push_dormitory_remind_to_group(conf, qqbot, option):
+def push_dormitory_remind_to_group(conf, qqbot, option, add_day: float = 0):
     today = today_utc_8_date()
+    if add_day > 0:
+        today += timedelta(days=add_day)
     boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
     girl_dormitory_today_clean_stu_list = get_girl_dormitory_clean_stu_list_of_date(today)
     if ((boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None)) \
@@ -392,6 +394,17 @@ def push_dormitory_remind_to_group(conf, qqbot, option):
     qqbot.send_group_message_custom_text_custom_at_qq_list_2(conf[option]["remind_text"],
                                                              boy_qq_list,
                                                              girl_qq_list)
+
+
+def push_dormitory_pre_clean_remind_to_group(conf, qqbot):
+    '''
+    【公寓卫生区预告打扫】提醒
+    :param conf:
+    :param qqbot:
+    :return:
+    '''
+    option = "dormitory_pre_clean"
+    push_dormitory_remind_to_group(conf, qqbot, option, add_day=1)
 
 
 def push_dormitory_clean_remind_to_group(conf, qqbot):
@@ -475,6 +488,7 @@ def getQQBot(conf):
 
 
 def start(health_checkin=False, one_day_three_detection=False
+          , dormitory_pre_clean=False
           , dormitory_clean=False
           , dormitory_sign=False
           , after_class_clean=False
@@ -495,6 +509,9 @@ def start(health_checkin=False, one_day_three_detection=False
     if one_day_three_detection:
         print("开始一日三检表提醒")
         push_one_day_three_detection_remind_to_group(conf)
+    if dormitory_pre_clean:
+        print("开始【公寓卫生区预告打扫】提醒")
+        push_dormitory_pre_clean_remind_to_group(conf, qqbot)
     if dormitory_clean:
         print("开始【公寓卫生区打扫】提醒")
         push_dormitory_clean_remind_to_group(conf, qqbot)
@@ -521,6 +538,8 @@ def SCF_start(event, context):
         one_day_three_detection = False
         # 宿舍卫生区打扫
         dormitory_clean = False
+        # 公寓卫生区预告打扫
+        dormitory_pre_clean = False
         # 宿舍卫生区打扫完签字
         dormitory_sign = False
         # 教室下课后提醒打扫
@@ -537,6 +556,9 @@ def SCF_start(event, context):
         if "一日三检表" in event["Message"].split(","):
             print("开始一日三检表提醒")
             one_day_three_detection = True
+        if "公寓卫生区预告打扫" in event["Message"].split(","):
+            print("开始【公寓卫生区预告打扫】提醒")
+            dormitory_pre_clean = True
         if "公寓卫生区打扫" in event["Message"].split(","):
             print("开始【公寓卫生区打扫】提醒")
             dormitory_clean = True
@@ -554,6 +576,7 @@ def SCF_start(event, context):
             important_clean = True
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
+              , dormitory_pre_clean=dormitory_pre_clean
               , dormitory_clean=dormitory_clean
               , dormitory_sign=dormitory_sign
               , after_class_clean=after_class_clean
@@ -575,6 +598,8 @@ if __name__ == '__main__':
         one_day_three_detection = False
         # 宿舍卫生区打扫
         dormitory_clean = False
+        # 公寓卫生区预告打扫
+        dormitory_pre_clean = False
         # 宿舍卫生区打扫完签字
         dormitory_sign = False
         # 教室下课后提醒打扫
@@ -589,6 +614,9 @@ if __name__ == '__main__':
         if "一日三检表" in args[1:]:
             print("开始一日三检表提醒")
             one_day_three_detection = True
+        if "公寓卫生区预告打扫" in args[1:]:
+            print("开始【公寓卫生区预告打扫】提醒")
+            dormitory_pre_clean = True
         if "公寓卫生区打扫" in args[1:]:
             print("开始【公寓卫生区打扫】提醒")
             dormitory_clean = True
@@ -606,6 +634,7 @@ if __name__ == '__main__':
             important_clean = True
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
+              , dormitory_pre_clean=dormitory_pre_clean
               , dormitory_clean=dormitory_clean
               , dormitory_sign=dormitory_sign
               , after_class_clean=after_class_clean
