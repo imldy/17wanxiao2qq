@@ -223,12 +223,7 @@ def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, 
                 no_check_stu_list2.append(stu)
 
     print("当前未打卡的人数{}，当前需要提醒的人数{}".format(no_check_num, no_check_no_ignore_num))
-    for i in no_check_stu_list2:
-        print("i.id:{},i.name:{},i.qq:{},i.ignore:{}".format(i.id, i.name, i.qq, i.ignore))
 
-    # stu_2 = Student(202104241306, "李德银", 3055325847, 0)
-    # no_check_stu_list = [stu_1, stu_2]
-    #
     if no_check_no_ignore_num > 0:
         # QQ推送相关
         qqbot = QQBot(root_url, verify_key, dest_group, bot_qq)
