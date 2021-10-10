@@ -337,6 +337,31 @@ def get_classroom_clean_stu_list_of_date(date: date):
             return stu_list_of_dormitory_id
 
 
+def get_stu_by_name(all_stu, name) -> Student:
+    '''
+    根据学生（stu）对象列表，返回姓名对应的学生对象
+    :param all_stu:
+    :param name:
+    :return:
+    '''
+    for stu in all_stu:
+        if name == stu.name:
+            return stu
+
+
+def get_stu_list_by_name_list(all_stu, name_list) -> list:
+    '''
+    根据学生（stu）对象列表与部分同学的姓名，返回姓名列表对应的学生对象列表
+    :param all_stu:
+    :param name_list:
+    :return:
+    '''
+    stu_list: list = []
+    for name in name_list:
+        stu_list.append(get_stu_by_name(all_stu, name))
+    return stu_list
+
+
 def get_qq_of_name(all_stu, name):
     '''
     根据学生（stu）对象列表，返回姓名对应的qq号
@@ -362,6 +387,22 @@ def get_qq_list_of_name_list(all_stu, name_list):
     return qq_list
 
 
+def get_qq_list_by_stu_list(stu_list: list, check_ignore=False):
+    '''
+    根据学生对象列表，获取学生QQ列表
+    :param stu_list: 学生对象列表
+    :param check_ignore: 是否检查忽略情况
+    :return:
+    '''
+    stu_qq_list: list = []
+    for stu in stu_list:
+        # 如果开启检查忽略情况，和该同学需要忽略，则略过该同学
+        if check_ignore and stu.ignore:
+            continue
+        stu_qq_list.append(stu.qq)
+    return stu_qq_list
+
+
 def push_one_day_three_detection_remind_to_group(conf):
     qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
     qqbot.verify()
@@ -382,12 +423,14 @@ def push_dormitory_remind_to_group(conf, qqbot, option, add_day: float = 0):
 
     all_stu = get_all_stu("stu_table.csv")
     if boy_dormitory_today_clean_stu_list != None:
-        boy_qq_list = get_qq_list_of_name_list(all_stu, boy_dormitory_today_clean_stu_list)
+        boy_stu_list = get_stu_list_by_name_list(all_stu, boy_dormitory_today_clean_stu_list)
+        boy_qq_list = get_qq_list_by_stu_list(boy_stu_list, check_ignore=True)
     else:
         print("男生值日人员为空")
         boy_qq_list = None
     if girl_dormitory_today_clean_stu_list != None:
-        girl_qq_list = get_qq_list_of_name_list(all_stu, girl_dormitory_today_clean_stu_list)
+        girl_stu_list = get_stu_list_by_name_list(all_stu, girl_dormitory_today_clean_stu_list)
+        girl_qq_list = get_qq_list_by_stu_list(girl_stu_list, check_ignore=True)
     else:
         print("女生值日人员为空")
         girl_qq_list = None
@@ -441,7 +484,8 @@ def push_classroom_remind(conf, qqbot, option):
     classroom_today_clean_stu_name_list = get_classroom_clean_stu_list_of_date(today)
     all_stu = get_all_stu("stu_table.csv")
     if classroom_today_clean_stu_name_list != None:
-        stu_qq_list = get_qq_list_of_name_list(all_stu, classroom_today_clean_stu_name_list)
+        stu_list = get_stu_list_by_name_list(all_stu, classroom_today_clean_stu_name_list)
+        stu_qq_list = get_qq_list_by_stu_list(stu_list, check_ignore=True)
         qqbot.send_group_message_custom_text_custom_at_qq_list(conf[option]["remind_text"], stu_qq_list)
     else:
         print("今天值日人员为空")
