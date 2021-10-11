@@ -178,23 +178,33 @@ class QQBot():
         return self.send_group_message(messageChain)
 
 
-def today_utc_8_date() -> date:
-    tz_utc_8 = timezone(timedelta(hours=8))
-    utc_8_dt: datetime = datetime.now(timezone.utc).astimezone(tz_utc_8)
-    return utc_8_dt.date()
+class Util():
+    @classmethod
+    def today_utc_8_date(cls) -> date:
+        tz_utc_8 = timezone(timedelta(hours=8))
+        utc_8_dt: datetime = datetime.now(timezone.utc).astimezone(tz_utc_8)
+        return utc_8_dt.date()
+
+    @classmethod
+    def is_no_check(cls, stu, stu_list):
+        '''
+        检查某学生是否再一个学生列表内
+        :param stu:
+        :param stu_list:
+        :return:
+        '''
+        for s in stu_list:
+            if stu.id == s.id:
+                return True
+        return False
+
+    @classmethod
+    def str_to_date(cls, str: str):
+        year_s, mon_s, day_s = str.split('-')
+        return date(int(year_s), int(mon_s), int(day_s))
 
 
-def is_no_check(stu, stu_list):
-    '''
-    检查某学生是否再一个学生列表内
-    :param stu:
-    :param stu_list:
-    :return:
-    '''
-    for s in stu_list:
-        if stu.id == s.id:
-            return True
-    return False
+# class StudentDao():
 
 
 def get_no_check_stu_list(wx_username, wx_password):
@@ -214,7 +224,7 @@ def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, 
     no_check_stu_list2 = []
     for stu in all_stu:
         # 如果此人确实没有打卡
-        if is_no_check(stu, no_check_stu_list):
+        if Util.is_no_check(stu, no_check_stu_list):
             # stu_1 = Student(202104241307, "李德银", 2310819457, 0)
             no_check_num += 1  # 因为有人是忽略提醒，所以这里累加的数值可能比需要提醒的要多
             # 不忽略，才加入
@@ -276,11 +286,6 @@ def get_stu_list_of_group_id(group_id: str):
             return fields[1].strip().split("、")
 
 
-def str_to_date(str: str):
-    year_s, mon_s, day_s = str.split('-')
-    return date(int(year_s), int(mon_s), int(day_s))
-
-
 def get_boy_dormitory_clean_stu_list_of_date(date: date):
     '''
     获取今日值日生列表
@@ -290,8 +295,8 @@ def get_boy_dormitory_clean_stu_list_of_date(date: date):
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
-        start_date = str_to_date(fields[0])
-        end_date = str_to_date(fields[1])
+        start_date = Util.str_to_date(fields[0])
+        end_date = Util.str_to_date(fields[1])
         # 判断是否在之间
         if start_date <= date <= end_date:
             print("{}介于{}和{}之间".format(date, start_date, end_date))
@@ -304,7 +309,7 @@ def get_girl_dormitory_clean_stu_list_of_date(date: date):
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
-        date1 = str_to_date(fields[0])
+        date1 = Util.str_to_date(fields[0])
         if date1 == date:
             group_id = fields[1]
             return get_stu_list_of_group_id(group_id)
@@ -319,8 +324,8 @@ def get_classroom_clean_stu_list_of_date(date: date):
     for line in lines[1:]:
         fields = line.strip().split(",")
         # 获取日期字段，转为date类型
-        start_date = str_to_date(fields[0])
-        end_date = str_to_date(fields[1])
+        start_date = Util.str_to_date(fields[0])
+        end_date = Util.str_to_date(fields[1])
         # 判断是否在之间
         if start_date <= date <= end_date:
             print("{}介于{}和{}之间".format(date, start_date, end_date))
@@ -406,7 +411,7 @@ def push_one_day_three_detection_remind_to_group(conf):
 
 
 def push_dormitory_remind_to_group(conf, qqbot, option, add_day: float = 0):
-    today = today_utc_8_date()
+    today = Util.today_utc_8_date()
     if add_day > 0:
         today += timedelta(days=add_day)
     boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
@@ -475,7 +480,7 @@ def push_classroom_remind(conf, qqbot, option):
     :param option:
     :return:
     '''
-    today = today_utc_8_date()
+    today = Util.today_utc_8_date()
     classroom_today_clean_stu_name_list = get_classroom_clean_stu_list_of_date(today)
     all_stu = get_all_stu("stu_table.csv")
     if classroom_today_clean_stu_name_list != None:
