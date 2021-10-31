@@ -6,6 +6,13 @@ import sys
 import yaml
 
 
+class Task():
+    def __init__(self, id, name, remind_text):
+        self.id = id
+        self.name = name
+        self.remind_text = remind_text
+
+
 class Student():
     def __init__(self, id, name, qq, ignore):
         self.id = id
@@ -519,6 +526,15 @@ def push_important_clean_to_group(conf, qqbot):
     push_classroom_remind(conf, qqbot, option)
 
 
+def push_remind_text_to_group_by_task_id(conf: dict, task_id: str, qqbot: QQBot):
+    tasks = conf["Tasks"]
+    for i in tasks:
+        if task_id == i["id"]:
+            task = Task(i["id"], i["name"], i["remind_text"])
+            print("开始提醒任务：{}".format(task.name))
+            qqbot.send_group_message_custom_text("【{}】{}".format(task.name, task.remind_text))
+
+
 def getQQBot(conf):
     qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
     qqbot.verify()
@@ -533,6 +549,7 @@ def start(health_checkin=False, one_day_three_detection=False
           , after_class_clean=False
           , after_night_lessons_clean=False
           , important_clean=False
+          , task_id_list=None
           ):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml", encoding="utf-8").read(), Loader=yaml.FullLoader)
@@ -566,6 +583,11 @@ def start(health_checkin=False, one_day_three_detection=False
     if important_clean:
         print("开始【自习室晚大扫除】提醒")
         push_important_clean_to_group(conf, qqbot)
+
+    if task_id_list is not None:
+        print("开始提醒任务列表")
+        for task_id in task_id_list:
+            push_remind_text_to_group_by_task_id(conf, task_id, qqbot)
 
 
 def SCF_start(event, context):
@@ -613,6 +635,13 @@ def SCF_start(event, context):
         if "自习室大扫除" in event["Message"].split(","):
             print("开始【自习室大扫除】提醒")
             important_clean = True
+        tasks_keyword = "Tasks:"
+        task_id_list = None
+        if tasks_keyword in event["Message"]:
+            argument = event["Message"]
+            # 取出子字符串，从tasks_keyword开始，到";"结尾
+            tasks_str: str = argument[argument.index(tasks_keyword) + len(tasks_keyword):argument.index(";")]
+            task_id_list = tasks_str.split(",")
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
               , dormitory_pre_clean=dormitory_pre_clean
@@ -621,6 +650,7 @@ def SCF_start(event, context):
               , after_class_clean=after_class_clean
               , after_night_lessons_clean=after_night_lessons_clean
               , important_clean=important_clean
+              , task_id_list=task_id_list
               )
 
     else:
@@ -671,6 +701,14 @@ if __name__ == '__main__':
         if "自习室大扫除" in args[1:]:
             print("开始【自习室大扫除】提醒")
             important_clean = True
+        tasks_keyword = "Tasks:"
+        task_id_list = None
+        for i in args[1:]:
+            if i.startswith(tasks_keyword):
+                argument = i
+                # 取出子字符串，从tasks_keyword开始，到";"结尾
+                tasks_str: str = argument[argument.index(tasks_keyword) + len(tasks_keyword):argument.index(";")]
+                task_id_list = tasks_str.split(",")
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
               , dormitory_pre_clean=dormitory_pre_clean
@@ -679,6 +717,7 @@ if __name__ == '__main__':
               , after_class_clean=after_class_clean
               , after_night_lessons_clean=after_night_lessons_clean
               , important_clean=important_clean
+              , task_id_list=task_id_list
               )
     else:
         start(health_checkin=True)
