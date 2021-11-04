@@ -110,6 +110,27 @@ class QQBot():
         msg = json.loads(resp.text)["msg"]
         return msg
 
+    def send_temp_session_message(self, dest_qq, group, messageChain):
+        data = {
+            "sessionKey": self.session_key,
+            "qq": dest_qq,
+            "group": group,
+            "messageChain": messageChain
+        }
+        resp = requests.post("{}/sendTempMessage".format(self.root_url), json=data)
+        msg = json.loads(resp.text)["msg"]
+        return msg
+
+    def send_friend_message(self, dest_qq, messageChain):
+        data = {
+            "sessionKey": self.session_key,
+            "target": dest_qq,
+            "messageChain": messageChain
+        }
+        resp = requests.post("{}/sendFriendMessage".format(self.root_url), json=data)
+        msg = json.loads(resp.text)["msg"]
+        return msg
+
     def send_group_message(self, messageChain):
         data = {
             "sessionKey": self.session_key,
