@@ -233,7 +233,7 @@ def get_no_check_stu_list(wx_username, wx_password):
     return no_check_stu_list
 
 
-def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, bot_qq):
+def push_to_group(no_check_stu_list, all_stu, qqbot):
     # 再从信息比较全的学生列表中拿出未打卡学生列表
     # 没打卡
     no_check_num = 0
@@ -253,10 +253,6 @@ def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, 
     print("当前未打卡的人数{}，当前需要提醒的人数{}".format(no_check_num, no_check_no_ignore_num))
 
     if no_check_no_ignore_num > 0:
-        # QQ推送相关
-        qqbot = QQBot(root_url, verify_key, dest_group, bot_qq)
-        qqbot.verify()
-        qqbot.bind()
         if no_check_no_ignore_num > 35:
             # 不列出名单，直接at全体成员
             qqbot.send_group_message_at_all(no_check_num)
@@ -580,8 +576,7 @@ def start(health_checkin=False, one_day_three_detection=False
         all_stu = get_all_stu("stu_table.csv")
 
         no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
-        push_to_group(no_check_stu_list, all_stu, conf["root_url"], conf["verify_key"], conf["dest_group"],
-                      conf["bot_qq"])
+        push_to_group(no_check_stu_list, all_stu, qqbot)
     if one_day_three_detection:
         print("开始一日三检表提醒")
         push_one_day_three_detection_remind_to_group(conf)
