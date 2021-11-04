@@ -576,7 +576,10 @@ def start(health_checkin=False, one_day_three_detection=False
         all_stu = get_all_stu("stu_table.csv")
 
         no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
-        push_to_group(no_check_stu_list, all_stu, qqbot)
+        if no_check_stu_list == None or len(no_check_stu_list) == 0:
+            print("皆已打卡")
+        else:
+            push_to_group(no_check_stu_list, all_stu, qqbot)
     if one_day_three_detection:
         print("开始一日三检表提醒")
         push_one_day_three_detection_remind_to_group(conf)
