@@ -3,6 +3,7 @@ from beans import Student, Task
 from net_api import WanXiao, QQBot
 from util import Util
 from dao import StudentDao, ClassroomDutyDao, BoyDormitoryDutyDao, GirlDormitoryDutyDao
+from factory import BeansFactory
 import sys
 import yaml
 
@@ -194,13 +195,6 @@ def push_remind_text_to_group_by_task_id(conf: dict, task_id: str, qqbot: QQBot)
             qqbot.send_group_message_custom_text("【{}】{}".format(task.name, task.remind_text))
 
 
-def getQQBot(conf):
-    qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
-    qqbot.verify()
-    qqbot.bind()
-    return qqbot
-
-
 def start(health_checkin=False, one_day_three_detection=False
           , dormitory_pre_clean=False
           , dormitory_clean=False
@@ -212,7 +206,8 @@ def start(health_checkin=False, one_day_three_detection=False
           ):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml", encoding="utf-8").read(), Loader=yaml.FullLoader)
-    qqbot = getQQBot(conf)
+    beansFactory = BeansFactory(conf)
+    qqbot = beansFactory.getQQBot(conf)
     if health_checkin:
         print("开始健康打卡提醒")
         # 将学生表格加载至内存
