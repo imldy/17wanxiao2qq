@@ -1,7 +1,8 @@
 from datetime import date, datetime, timezone, timedelta
-from beans import Student,Task
-from net_api import WanXiao,QQBot
+from beans import Student, Task
+from net_api import WanXiao, QQBot
 from util import Util
+from dao import StudentDao, ClassroomDutyDao, BoyDormitoryDutyDao, GirlDormitoryDutyDao
 import sys
 import yaml
 
@@ -48,140 +49,6 @@ def push_to_group(no_check_stu_list, all_stu, qqbot):
         print("均已健康打卡")
 
 
-def get_all_stu(conf_path):
-    lines = open(conf_path, encoding="utf-8").readlines()
-    all_stu = []
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        all_stu.append(Student(fields[0], fields[1], fields[2], int(fields[3])))
-        # print(fields)
-    return all_stu
-
-
-def get_stu_list_of_dormitory_id(dormitory_id: str):
-    '''
-    根据宿舍号获取宿舍内的人员名单，以姓名列表形式返回
-    :param dormitory_id:
-    :return:姓名列表
-    '''
-    lines = open("table/dormitory_stu_table.csv", encoding="utf-8").readlines()
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
-        if fields[0] == dormitory_id:
-            return fields[1].strip().split("、")
-
-
-def get_stu_list_of_group_id(group_id: str):
-    lines = open("table/group_stu_table.csv", encoding="utf-8").readlines()
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        # 如果列表中第1个元素等于传入的宿舍号，则返回姓名列表
-        if fields[0] == group_id:
-            return fields[1].strip().split("、")
-
-
-def get_boy_dormitory_clean_stu_list_of_date(date: date):
-    '''
-    获取今日值日生列表
-    :return:
-    '''
-    lines = open("duty_table/boy_dormitory.csv", encoding="utf-8").readlines()
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        # 获取日期字段，转为date类型
-        start_date = Util.str_to_date(fields[0])
-        end_date = Util.str_to_date(fields[1])
-        # 判断是否在之间
-        if start_date <= date <= end_date:
-            print("{}介于{}和{}之间".format(date, start_date, end_date))
-            dormitory_id = fields[2]
-            return get_stu_list_of_dormitory_id(dormitory_id)
-
-
-def get_girl_dormitory_clean_stu_list_of_date(date: date):
-    lines = open("duty_table/girl_dormitory.csv", encoding="utf-8").readlines()
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        # 获取日期字段，转为date类型
-        date1 = Util.str_to_date(fields[0])
-        if date1 == date:
-            group_id = fields[1]
-            return get_stu_list_of_group_id(group_id)
-
-
-def get_classroom_clean_stu_list_of_date(date: date):
-    '''
-    获取今日值日生列表
-    :return: 学生姓名列表
-    '''
-    lines = open("duty_table/classroom.csv", encoding="utf-8").readlines()
-    for line in lines[1:]:
-        fields = line.strip().split(",")
-        # 获取日期字段，转为date类型
-        start_date = Util.str_to_date(fields[0])
-        end_date = Util.str_to_date(fields[1])
-        # 判断是否在之间
-        if start_date <= date <= end_date:
-            print("{}介于{}和{}之间".format(date, start_date, end_date))
-            # 如果是多个宿舍，取出宿舍号
-            dormitory_ids = fields[2].strip().split("+")
-            stu_list_of_dormitory_id = []
-            for dormitory_id in dormitory_ids:
-                stu_list_of_dormitory_id += get_stu_list_of_dormitory_id(dormitory_id)
-            return stu_list_of_dormitory_id
-
-
-def get_stu_by_name(all_stu, name) -> Student:
-    '''
-    根据学生（stu）对象列表，返回姓名对应的学生对象
-    :param all_stu:
-    :param name:
-    :return:
-    '''
-    for stu in all_stu:
-        if name == stu.name:
-            return stu
-
-
-def get_stu_list_by_name_list(all_stu, name_list) -> list:
-    '''
-    根据学生（stu）对象列表与部分同学的姓名，返回姓名列表对应的学生对象列表
-    :param all_stu:
-    :param name_list:
-    :return:
-    '''
-    stu_list: list = []
-    for name in name_list:
-        stu_list.append(get_stu_by_name(all_stu, name))
-    return stu_list
-
-
-def get_qq_of_name(all_stu, name):
-    '''
-    根据学生（stu）对象列表，返回姓名对应的qq号
-    :param all_stu:
-    :param name:
-    :return:
-    '''
-    for stu in all_stu:
-        if name == stu.name:
-            return stu.qq
-
-
-def get_qq_list_of_name_list(all_stu, name_list):
-    '''
-    根据学生（stu）对象列表，返回姓名列表对应的qq号列表
-    :param all_stu:
-    :param name_list:
-    :return:
-    '''
-    qq_list = []
-    for name in name_list:
-        qq_list.append(get_qq_of_name(all_stu, name))
-    return qq_list
-
-
 def get_qq_list_by_stu_list(stu_list: list, check_ignore=False):
     '''
     根据学生对象列表，获取学生QQ列表
@@ -209,21 +76,21 @@ def push_dormitory_remind_to_group(conf, qqbot, option, add_day: float = 0):
     today = Util.today_utc_8_date()
     if add_day > 0:
         today += timedelta(days=add_day)
-    boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
-    girl_dormitory_today_clean_stu_list = get_girl_dormitory_clean_stu_list_of_date(today)
+    boy_dormitory_today_clean_stu_list = BoyDormitoryDutyDao.get_boy_dormitory_clean_stu_list_of_date(today)
+    girl_dormitory_today_clean_stu_list = GirlDormitoryDutyDao.get_girl_dormitory_clean_stu_list_of_date(today)
     if (boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None):
         print("今日男生女生公寓人员都为无")
         return None
 
-    all_stu = get_all_stu("stu_table.csv")
+    all_stu = StudentDao.get_all_stu("stu_table.csv")
     if boy_dormitory_today_clean_stu_list != None:
-        boy_stu_list = get_stu_list_by_name_list(all_stu, boy_dormitory_today_clean_stu_list)
+        boy_stu_list = StudentDao.get_stu_list_by_name_list(all_stu, boy_dormitory_today_clean_stu_list)
         boy_qq_list = get_qq_list_by_stu_list(boy_stu_list, check_ignore=True)
     else:
         print("男生值日人员为空")
         boy_qq_list = None
     if girl_dormitory_today_clean_stu_list != None:
-        girl_stu_list = get_stu_list_by_name_list(all_stu, girl_dormitory_today_clean_stu_list)
+        girl_stu_list = StudentDao.get_stu_list_by_name_list(all_stu, girl_dormitory_today_clean_stu_list)
         girl_qq_list = get_qq_list_by_stu_list(girl_stu_list, check_ignore=True)
     else:
         print("女生值日人员为空")
@@ -275,10 +142,10 @@ def push_classroom_remind(conf, qqbot, option):
     :return:
     '''
     today = Util.today_utc_8_date()
-    classroom_today_clean_stu_name_list = get_classroom_clean_stu_list_of_date(today)
-    all_stu = get_all_stu("stu_table.csv")
+    classroom_today_clean_stu_name_list = ClassroomDutyDao.get_classroom_clean_stu_list_of_date(today)
+    all_stu = StudentDao.get_all_stu("stu_table.csv")
     if classroom_today_clean_stu_name_list != None:
-        stu_list = get_stu_list_by_name_list(all_stu, classroom_today_clean_stu_name_list)
+        stu_list = StudentDao.get_stu_list_by_name_list(all_stu, classroom_today_clean_stu_name_list)
         stu_qq_list = get_qq_list_by_stu_list(stu_list, check_ignore=True)
         qqbot.send_group_message_custom_text_custom_at_qq_list(conf[option]["remind_text"], stu_qq_list)
     else:
@@ -349,7 +216,7 @@ def start(health_checkin=False, one_day_three_detection=False
     if health_checkin:
         print("开始健康打卡提醒")
         # 将学生表格加载至内存
-        all_stu = get_all_stu("stu_table.csv")
+        all_stu = StudentDao.get_all_stu("stu_table.csv")
 
         no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
         if no_check_stu_list == None or len(no_check_stu_list) == 0:
