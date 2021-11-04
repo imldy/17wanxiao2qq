@@ -418,8 +418,7 @@ def push_dormitory_remind_to_group(conf, qqbot, option, add_day: float = 0):
         today += timedelta(days=add_day)
     boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
     girl_dormitory_today_clean_stu_list = get_girl_dormitory_clean_stu_list_of_date(today)
-    if ((boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None)) \
-            or (len(boy_dormitory_today_clean_stu_list) == 0 and len(girl_dormitory_today_clean_stu_list) == 0):
+    if (boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None):
         print("今日男生女生公寓人员都为无")
         return None
 
