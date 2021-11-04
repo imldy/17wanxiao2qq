@@ -6,6 +6,13 @@ import sys
 import yaml
 
 
+class Task():
+    def __init__(self, id, name, remind_text):
+        self.id = id
+        self.name = name
+        self.remind_text = remind_text
+
+
 class Student():
     def __init__(self, id, name, qq, ignore):
         self.id = id
@@ -100,6 +107,27 @@ class QQBot():
             "qq": self.bot_qq
         }
         resp = requests.post("{}/bind".format(self.root_url), json=data)
+        msg = json.loads(resp.text)["msg"]
+        return msg
+
+    def send_temp_session_message(self, dest_qq, group, messageChain):
+        data = {
+            "sessionKey": self.session_key,
+            "qq": dest_qq,
+            "group": group,
+            "messageChain": messageChain
+        }
+        resp = requests.post("{}/sendTempMessage".format(self.root_url), json=data)
+        msg = json.loads(resp.text)["msg"]
+        return msg
+
+    def send_friend_message(self, dest_qq, messageChain):
+        data = {
+            "sessionKey": self.session_key,
+            "target": dest_qq,
+            "messageChain": messageChain
+        }
+        resp = requests.post("{}/sendFriendMessage".format(self.root_url), json=data)
         msg = json.loads(resp.text)["msg"]
         return msg
 
@@ -215,7 +243,7 @@ def get_no_check_stu_list(wx_username, wx_password):
     return no_check_stu_list
 
 
-def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, bot_qq):
+def push_to_group(no_check_stu_list, all_stu, qqbot):
     # 再从信息比较全的学生列表中拿出未打卡学生列表
     # 没打卡
     no_check_num = 0
@@ -235,10 +263,6 @@ def push_to_group(no_check_stu_list, all_stu, root_url, verify_key, dest_group, 
     print("当前未打卡的人数{}，当前需要提醒的人数{}".format(no_check_num, no_check_no_ignore_num))
 
     if no_check_no_ignore_num > 0:
-        # QQ推送相关
-        qqbot = QQBot(root_url, verify_key, dest_group, bot_qq)
-        qqbot.verify()
-        qqbot.bind()
         if no_check_no_ignore_num > 35:
             # 不列出名单，直接at全体成员
             qqbot.send_group_message_at_all(no_check_num)
@@ -416,8 +440,7 @@ def push_dormitory_remind_to_group(conf, qqbot, option, add_day: float = 0):
         today += timedelta(days=add_day)
     boy_dormitory_today_clean_stu_list = get_boy_dormitory_clean_stu_list_of_date(today)
     girl_dormitory_today_clean_stu_list = get_girl_dormitory_clean_stu_list_of_date(today)
-    if ((boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None)) \
-            or (len(boy_dormitory_today_clean_stu_list) == 0 and len(girl_dormitory_today_clean_stu_list) == 0):
+    if (boy_dormitory_today_clean_stu_list is None) and (girl_dormitory_today_clean_stu_list is None):
         print("今日男生女生公寓人员都为无")
         return None
 
@@ -524,6 +547,15 @@ def push_important_clean_to_group(conf, qqbot):
     push_classroom_remind(conf, qqbot, option)
 
 
+def push_remind_text_to_group_by_task_id(conf: dict, task_id: str, qqbot: QQBot):
+    tasks = conf["Tasks"]
+    for i in tasks:
+        if task_id == i["id"]:
+            task = Task(i["id"], i["name"], i["remind_text"])
+            print("开始提醒任务：{}".format(task.name))
+            qqbot.send_group_message_custom_text("【{}】{}".format(task.name, task.remind_text))
+
+
 def getQQBot(conf):
     qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
     qqbot.verify()
@@ -538,6 +570,7 @@ def start(health_checkin=False, one_day_three_detection=False
           , after_class_clean=False
           , after_night_lessons_clean=False
           , important_clean=False
+          , task_id_list=None
           ):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml", encoding="utf-8").read(), Loader=yaml.FullLoader)
@@ -548,8 +581,10 @@ def start(health_checkin=False, one_day_three_detection=False
         all_stu = get_all_stu("stu_table.csv")
 
         no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
-        push_to_group(no_check_stu_list, all_stu, conf["root_url"], conf["verify_key"], conf["dest_group"],
-                      conf["bot_qq"])
+        if no_check_stu_list == None or len(no_check_stu_list) == 0:
+            print("皆已打卡")
+        else:
+            push_to_group(no_check_stu_list, all_stu, qqbot)
     if one_day_three_detection:
         print("开始一日三检表提醒")
         push_one_day_three_detection_remind_to_group(conf)
@@ -571,6 +606,11 @@ def start(health_checkin=False, one_day_three_detection=False
     if important_clean:
         print("开始【自习室晚大扫除】提醒")
         push_important_clean_to_group(conf, qqbot)
+
+    if task_id_list is not None:
+        print("开始提醒任务列表")
+        for task_id in task_id_list:
+            push_remind_text_to_group_by_task_id(conf, task_id, qqbot)
 
 
 def SCF_start(event, context):
@@ -618,6 +658,13 @@ def SCF_start(event, context):
         if "自习室大扫除" in event["Message"].split(","):
             print("开始【自习室大扫除】提醒")
             important_clean = True
+        tasks_keyword = "Tasks:"
+        task_id_list = None
+        if tasks_keyword in event["Message"]:
+            argument = event["Message"]
+            # 取出子字符串，从tasks_keyword开始，到";"结尾
+            tasks_str: str = argument[argument.index(tasks_keyword) + len(tasks_keyword):argument.index(";")]
+            task_id_list = tasks_str.split(",")
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
               , dormitory_pre_clean=dormitory_pre_clean
@@ -626,6 +673,7 @@ def SCF_start(event, context):
               , after_class_clean=after_class_clean
               , after_night_lessons_clean=after_night_lessons_clean
               , important_clean=important_clean
+              , task_id_list=task_id_list
               )
 
     else:
@@ -676,6 +724,14 @@ if __name__ == '__main__':
         if "自习室大扫除" in args[1:]:
             print("开始【自习室大扫除】提醒")
             important_clean = True
+        tasks_keyword = "Tasks:"
+        task_id_list = None
+        for i in args[1:]:
+            if i.startswith(tasks_keyword):
+                argument = i
+                # 取出子字符串，从tasks_keyword开始，到";"结尾
+                tasks_str: str = argument[argument.index(tasks_keyword) + len(tasks_keyword):argument.index(";")]
+                task_id_list = tasks_str.split(",")
 
         start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
               , dormitory_pre_clean=dormitory_pre_clean
@@ -684,6 +740,7 @@ if __name__ == '__main__':
               , after_class_clean=after_class_clean
               , after_night_lessons_clean=after_night_lessons_clean
               , important_clean=important_clean
+              , task_id_list=task_id_list
               )
     else:
         start(health_checkin=True)
