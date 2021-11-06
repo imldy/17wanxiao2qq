@@ -66,10 +66,7 @@ def get_qq_list_by_stu_list(stu_list: list, check_ignore=False):
     return stu_qq_list
 
 
-def push_one_day_three_detection_remind_to_group(conf):
-    qqbot = QQBot(conf["root_url"], conf["verify_key"], conf["dest_group"], conf["bot_qq"])
-    qqbot.verify()
-    qqbot.bind()
+def push_one_day_three_detection_remind_to_group(conf, qqbot):
     qqbot.send_group_message_custom_text("关于一日三检表：麻烦大家按时测温并如实填写，双周周末上交。💖🎉")
 
 
@@ -220,7 +217,7 @@ def start(health_checkin=False, one_day_three_detection=False
             push_to_group(no_check_stu_list, all_stu, qqbot)
     if one_day_three_detection:
         print("开始一日三检表提醒")
-        push_one_day_three_detection_remind_to_group(conf)
+        push_one_day_three_detection_remind_to_group(conf, qqbot)
     if dormitory_pre_clean:
         print("开始【公寓卫生区预告打扫】提醒")
         push_dormitory_pre_clean_remind_to_group(conf, qqbot)
