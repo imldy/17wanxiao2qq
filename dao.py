@@ -1,6 +1,7 @@
 from datetime import date
-from beans import Student
-from util import Util
+from beans import Student, Task, Dest
+from factory import BeansFactory
+from util import Util, TaskUtil, CrowdUtil, DestUtil
 
 
 class StudentDao():
@@ -143,3 +144,71 @@ class BoyDormitoryDutyDao():
                 print("{}介于{}和{}之间".format(date, start_date, end_date))
                 dormitory_id = fields[2]
                 return StudentDao.get_stu_list_of_dormitory_id(dormitory_id)
+
+
+class TaskDao():
+    def __init__(self, conf: dict):
+        self.conf: dict = conf
+        self.taskList = None
+        self.beansFactory = BeansFactory(conf)
+        self.destDao = self.beansFactory.getDestDao()
+
+    def getAllTask(self) -> list:
+        taskList = []
+        for i in self.conf["Tasks"]:
+            task: Task = TaskUtil.parseDict(i, self.destDao)
+            taskList.append(task)
+        self.taskList = taskList
+        return taskList
+
+    def getTaskById(self, id: str) -> Task:
+        if self.taskList == None:
+            self.taskList = self.getAllTask()
+        for task in self.taskList:
+            if id == task.id:
+                return task
+
+
+class CrowdDao():
+    def __init__(self, conf: dict):
+        self.conf: dict = conf
+        self.crowdList = None
+
+    def getAllCrowd(self) -> list:
+        crowdList = []
+        for i in self.conf["Crowds"]:
+            crowd = CrowdUtil.parseDict(i)
+            crowdList.append(crowd)
+        self.crowdList = crowdList
+        return crowdList
+
+    def getCrowdByTag(self, tag: str):
+        if self.crowdList == None:
+            self.crowdList = self.getAllCrowd()
+        for corwd in self.crowdList:
+            if tag == corwd.tag:
+                return corwd
+
+
+class DestDao():
+    def __init__(self, conf: dict):
+        self.conf: dict = conf
+        self.destList = None
+
+    def getAllDest(self) -> list:
+        destList = []
+        for i in self.conf["Destinations"]:
+            dest = DestUtil.parseDict(i)
+            destList.append(dest)
+        return destList
+
+    def getDestByTag(self, tag: str) -> Dest:
+        if self.destList == None:
+            self.destList = self.getAllDest()
+        for dest in self.destList:
+            if tag == dest.tag:
+                return dest
+
+
+if __name__ == '__main__':
+    print(Dest.GROUP)
