@@ -1,5 +1,5 @@
 from datetime import date
-from beans import Student, Task, Dest
+from beans import Student, Task, Dest, Bot
 from factory import BeansFactory
 from util import Util, TaskUtil, CrowdUtil, DestUtil, BotUtil
 
@@ -222,7 +222,7 @@ class BotDao():
             botList.append(bot)
         return botList
 
-    def getBotByTag(self, tag: str) -> Dest:
+    def getBotByTag(self, tag: str) -> Bot:
         if self.botList == None:
             self.botList = self.getAllBot()
         for bot in self.botList:
