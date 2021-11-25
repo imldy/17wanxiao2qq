@@ -192,50 +192,15 @@ def push_remind_text_to_group_by_task_id(conf: dict, task_id: str, qqbot: QQBot)
             qqbot.send_group_message_custom_text("【{}】{}".format(task.name, task.remind_text))
 
 
-def start(health_checkin=False, one_day_three_detection=False
-          , dormitory_pre_clean=False
-          , dormitory_clean=False
-          , dormitory_sign=False
-          , after_class_clean=False
-          , after_night_lessons_clean=False
-          , important_clean=False
-          , task_id_list=None
-          ):
+# Controller层
+
+def start(task_id_list=None):
     print("开发者：青岛黄海学院 2021级计算机科学与技术专升本4班 李德银")
     conf = yaml.load(open("conf.yaml", encoding="utf-8").read(), Loader=yaml.FullLoader)
     beansFactory = BeansFactory(conf)
     qqbot = beansFactory.getQQBot(conf)
-    if health_checkin:
-        print("开始健康打卡提醒")
-        # 将学生表格加载至内存
-        all_stu = StudentDao.get_all_stu("stu_table.csv")
-
-        no_check_stu_list = get_no_check_stu_list(conf["wx_account"]["username"], conf["wx_account"]["password"])
-        if no_check_stu_list == None or len(no_check_stu_list) == 0:
-            print("皆已打卡")
-        else:
-            push_to_group(no_check_stu_list, all_stu, qqbot)
-    if one_day_three_detection:
-        print("开始一日三检表提醒")
-        push_one_day_three_detection_remind_to_group(conf, qqbot)
-    if dormitory_pre_clean:
-        print("开始【公寓卫生区预告打扫】提醒")
-        push_dormitory_pre_clean_remind_to_group(conf, qqbot)
-    if dormitory_clean:
-        print("开始【公寓卫生区打扫】提醒")
-        push_dormitory_clean_remind_to_group(conf, qqbot)
-    if dormitory_sign:
-        print("开始【公寓卫生区打扫后签到】提醒")
-        push_dormitory_sign_remind_to_group(conf, qqbot)
-    if after_class_clean:
-        print("开始【教室下课后提醒打扫】提醒")
-        push_after_class_clean_to_group(conf, qqbot)
-    if after_night_lessons_clean:
-        print("开始【自习室晚自习后打扫】提醒")
-        push_after_night_lessons_clean_to_group(conf, qqbot)
-    if important_clean:
-        print("开始【自习室晚大扫除】提醒")
-        push_important_clean_to_group(conf, qqbot)
+    wx2QQService = beansFactory.getWX2QQService(conf)
+    wx2QQService.bindQQBot(qqbot)
 
     if task_id_list is not None:
         print("开始提醒任务列表")
@@ -247,47 +212,6 @@ def SCF_start(event, context):
     # 判断是否含有Message键，如果有就判断并开启某项功能，没有就启用默认选项：提醒健康打卡
     if event.__contains__("Message") and (event["Message"] != None) and (event["Message"] != ""):
         print("接收到Message：" + event["Message"])
-        # 相关选项置默认为关闭
-        health_checkin = False
-        one_day_three_detection = False
-        # 宿舍卫生区打扫
-        dormitory_clean = False
-        # 公寓卫生区预告打扫
-        dormitory_pre_clean = False
-        # 宿舍卫生区打扫完签字
-        dormitory_sign = False
-        # 教室下课后提醒打扫
-        after_class_clean = False
-        # 自习室晚自习后打扫
-        after_night_lessons_clean = False
-        # 大扫除
-        important_clean = False
-
-        # 如果信息里面由包含相关选项，就启动
-        if "健康打卡" in event["Message"].split(","):
-            print("开始健康打卡提醒")
-            health_checkin = True
-        if "一日三检表" in event["Message"].split(","):
-            print("开始一日三检表提醒")
-            one_day_three_detection = True
-        if "公寓卫生区预告打扫" in event["Message"].split(","):
-            print("开始【公寓卫生区预告打扫】提醒")
-            dormitory_pre_clean = True
-        if "公寓卫生区打扫" in event["Message"].split(","):
-            print("开始【公寓卫生区打扫】提醒")
-            dormitory_clean = True
-        if "公寓卫生区签到" in event["Message"].split(","):
-            print("开始【公寓卫生区签到】提醒")
-            dormitory_sign = True
-        if "教室下课后打扫" in event["Message"].split(","):
-            print("开始【教室下课后打扫】提醒")
-            after_class_clean = True
-        if "自习室放学后打扫" in event["Message"].split(","):
-            print("开始【自习室放学后打扫】提醒")
-            after_night_lessons_clean = True
-        if "自习室大扫除" in event["Message"].split(","):
-            print("开始【自习室大扫除】提醒")
-            important_clean = True
         tasks_keyword = "Tasks:"
         task_id_list = None
         if tasks_keyword in event["Message"]:
@@ -296,64 +220,15 @@ def SCF_start(event, context):
             tasks_str: str = argument[argument.index(tasks_keyword) + len(tasks_keyword):argument.index(";")]
             task_id_list = tasks_str.split(",")
 
-        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
-              , dormitory_pre_clean=dormitory_pre_clean
-              , dormitory_clean=dormitory_clean
-              , dormitory_sign=dormitory_sign
-              , after_class_clean=after_class_clean
-              , after_night_lessons_clean=after_night_lessons_clean
-              , important_clean=important_clean
-              , task_id_list=task_id_list
-              )
-
+        start(task_id_list=task_id_list)
     else:
-        print("未接收到Message，开始运行默认选项")
-        start(health_checkin=True)
+        print("未接收到Message")
 
 
 if __name__ == '__main__':
     args = sys.argv
     # 判断是否输入了别的启动参数，如果有就判断并开启某项功能，没有就启用默认选项：提醒健康打卡
     if len(args) > 1:
-        # 相关选项置默认为关闭
-        health_checkin = False
-        one_day_three_detection = False
-        # 宿舍卫生区打扫
-        dormitory_clean = False
-        # 公寓卫生区预告打扫
-        dormitory_pre_clean = False
-        # 宿舍卫生区打扫完签字
-        dormitory_sign = False
-        # 教室下课后提醒打扫
-        after_class_clean = False
-        # 自习室晚自习后打扫
-        after_night_lessons_clean = False
-        # 大扫除
-        important_clean = False
-        if "健康打卡" in args[1:]:
-            print("开始健康打卡提醒")
-            health_checkin = True
-        if "一日三检表" in args[1:]:
-            print("开始一日三检表提醒")
-            one_day_three_detection = True
-        if "公寓卫生区预告打扫" in args[1:]:
-            print("开始【公寓卫生区预告打扫】提醒")
-            dormitory_pre_clean = True
-        if "公寓卫生区打扫" in args[1:]:
-            print("开始【公寓卫生区打扫】提醒")
-            dormitory_clean = True
-        if "公寓卫生区签到" in args[1:]:
-            print("开始【公寓卫生区签到】提醒")
-            dormitory_sign = True
-        if "教室下课后打扫" in args[1:]:
-            print("开始【教室下课后打扫】提醒")
-            after_class_clean = True
-        if "自习室放学后打扫" in args[1:]:
-            print("开始【自习室放学后打扫】提醒")
-            after_night_lessons_clean = True
-        if "自习室大扫除" in args[1:]:
-            print("开始【自习室大扫除】提醒")
-            important_clean = True
         tasks_keyword = "Tasks:"
         task_id_list = None
         for i in args[1:]:
@@ -363,14 +238,6 @@ if __name__ == '__main__':
                 tasks_str: str = argument[argument.index(tasks_keyword) + len(tasks_keyword):argument.index(";")]
                 task_id_list = tasks_str.split(",")
 
-        start(health_checkin=health_checkin, one_day_three_detection=one_day_three_detection
-              , dormitory_pre_clean=dormitory_pre_clean
-              , dormitory_clean=dormitory_clean
-              , dormitory_sign=dormitory_sign
-              , after_class_clean=after_class_clean
-              , after_night_lessons_clean=after_night_lessons_clean
-              , important_clean=important_clean
-              , task_id_list=task_id_list
-              )
+        start(task_id_list=task_id_list)
     else:
-        start(health_checkin=True)
+        print("未接收到要进行的Task")
