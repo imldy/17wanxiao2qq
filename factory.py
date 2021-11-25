@@ -1,4 +1,4 @@
-from dao import TaskDao, DestDao
+from dao import TaskDao, DestDao, BotDao
 from net_api import QQBot
 from wx2qq import WX2QQService
 
@@ -32,3 +32,7 @@ class BeansFactory():
     def getDestDao(self, conf=None):
         destDao = DestDao(conf)
         return destDao
+
+    def getBotDao(self, conf=None) -> BotDao:
+        botDao = BotDao(conf)
+        return botDao
