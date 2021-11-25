@@ -58,3 +58,15 @@ class WX_Account(Account):
 class Remind():
     PLAIN = "plain"
     NEED_AT = "Need At"
+
+
+class Bot():
+    MIRAI_API_HTTP_HTTP = "mirai-api-http http"
+    MIRAI_API_HTTP_ws = "mirai-api-http ws"
+
+    def __init__(self, tag):
+        self.tag = tag
+        self.type = None
+        self.qq_no = None
+        self.root_url = None
+        self.verify_key = None

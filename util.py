@@ -1,5 +1,5 @@
 from datetime import date, datetime, timezone, timedelta
-from beans import Student, Task, Dest, Crowd, WX_Account, Remind
+from beans import Student, Task, Dest, Crowd, WX_Account, Remind, Bot
 from dao import DestDao, CrowdDao
 from factory import BeansFactory
 
@@ -125,3 +125,17 @@ class DestUtil():
         if "email" in arg:
             dest.email = arg["email"]
         return dest
+
+class BotUtil():
+    @classmethod
+    def parseDict(cls, arg: dict)->Bot:
+        bot = Bot(arg["tag"])
+        if arg["type"].lower() == Bot.MIRAI_API_HTTP_HTTP:
+            bot.type=Bot.MIRAI_API_HTTP_HTTP
+        if "qq_no" in arg:
+            bot.qq_no = ["qq_no"]
+        if "root_url" in arg:
+            bot.root_url = ["root_url"]
+        if "verify_key" in arg:
+            bot.verify_key = ["verify_key"]
+        return  bot

@@ -1,7 +1,7 @@
 from datetime import date
 from beans import Student, Task, Dest
 from factory import BeansFactory
-from util import Util, TaskUtil, CrowdUtil, DestUtil
+from util import Util, TaskUtil, CrowdUtil, DestUtil, BotUtil
 
 
 class StudentDao():
@@ -208,6 +208,26 @@ class DestDao():
         for dest in self.destList:
             if tag == dest.tag:
                 return dest
+
+
+class BotDao():
+    def __init__(self, conf: dict):
+        self.conf: dict = conf
+        self.botList = None
+
+    def getAllBot(self) -> list:
+        botList = []
+        for i in self.conf["Bots"]:
+            bot = BotUtil.parseDict(i)
+            botList.append(bot)
+        return botList
+
+    def getBotByTag(self, tag: str) -> Dest:
+        if self.botList == None:
+            self.botList = self.getAllBot()
+        for bot in self.botList:
+            if tag == bot.tag:
+                return bot
 
 
 if __name__ == '__main__':
