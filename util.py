@@ -160,3 +160,23 @@ class StudentUtil():
         for stu in stuList:
             stuNoList.append(stu.id)
         return stuNoList
+
+    @classmethod
+    def getAtStuListByStuList(cls, stuList: list, enbaleIgnore=True, interval="\n") -> MessageChain:
+        '''
+        获取at学生qq列表，以MessageChain的形式返回
+        :param stuList:
+        :param enbaleIgnore:
+        :return:
+        '''
+        # 需要@的QQ列表，组成messageChain
+        at_msg_list: list = []
+        for stu in stuList:
+            if stu.ignore and enbaleIgnore:
+                # 如果 要忽略 并且 启用忽略判断
+                continue
+            if len(at_msg_list) >= 1:
+                at_msg_list.append(interval)
+            at_msg_list.append(At(stu.qq))
+        msgc = MessageChain(at_msg_list)
+        return msgc
