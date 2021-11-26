@@ -118,6 +118,8 @@ class DestUtil():
             dest.type = Dest.GROUP
         elif arg["type"].lower() == Dest.PERSON.lower():
             dest.type = Dest.PERSON
+        elif arg["type"].lower() == Dest.PRIVATE_CHAT.lower():
+            dest.type = Dest.PRIVATE_CHAT
         if "no" in arg:
             dest.no = arg["no"]
         if "nos" in arg:

@@ -24,6 +24,7 @@ class Student():
 class Dest():
     GROUP = "GROUP"
     PERSON = "PERSON"
+    PRIVATE_CHAT = "PRIVATE_CHAT"
 
     def __init__(self, tag: str):
         self.tag: str = tag
