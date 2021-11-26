@@ -1,6 +1,8 @@
 import requests
 import json
 
+from beans import Student
+
 
 class QQBot():
     def __init__(self, root_url, verify_key, dest_group_no, bot_qq):
