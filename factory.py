@@ -1,4 +1,4 @@
-from dao import TaskDao, DestDao, BotDao
+from dao import TaskDao, DestDao, BotDao, StudentDao
 from net_api import QQBot
 from wx2qq import WX2QQService
 
@@ -36,3 +36,8 @@ class BeansFactory():
     def getBotDao(self, conf=None) -> BotDao:
         botDao = BotDao(conf)
         return botDao
+
+    def getStudentDao(self, conf=None) -> StudentDao:
+        studentDao = StudentDao()
+        studentDao.conf_path = "stu_table.csv"
+        return studentDao
