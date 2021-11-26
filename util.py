@@ -146,7 +146,7 @@ class BotUtil():
 
 class StudentUtil():
     @classmethod
-    def getStuNoListByStuList(stuList: list) -> list:
+    def getStuNoListByStuList(cls, stuList: list) -> list:
         '''
         根据学生对象列表，获取学生学号列表
         :return:
