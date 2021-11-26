@@ -5,6 +5,9 @@ from util import Util, TaskUtil, CrowdUtil, DestUtil, BotUtil
 
 
 class StudentDao():
+    all_stu = None
+    conf_path = None
+
     @classmethod
     def get_all_stu(cls, conf_path):
         lines = open(conf_path, encoding="utf-8").readlines()
@@ -13,6 +16,8 @@ class StudentDao():
             fields = line.strip().split(",")
             all_stu.append(Student(fields[0], fields[1], fields[2], int(fields[3])))
             # print(fields)
+        cls.all_stu = all_stu
+        cls.conf_path = conf_path
         return all_stu
 
     @classmethod
