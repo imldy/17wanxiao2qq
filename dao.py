@@ -93,6 +93,26 @@ class StudentDao():
             qq_list.append(StudentDao.get_qq_of_name(all_stu, name))
         return qq_list
 
+    @classmethod
+    def getStuListByStuNoList(cls, stuNoList: list, enbaleIgnore=True) -> list:
+        '''
+        根据学号列表，获取学号列表对应的学生列表
+        :param stuNoList: 学号列表
+        :param enbaleIgnore: 启用判断是否忽略学生
+        :return:
+        '''
+        if cls.all_stu == None:
+            cls.get_all_stu(cls.conf_path)
+        stuList: list = []
+        for stu in cls.all_stu:
+            # 如果在某个列表中
+            if stu.id in stuNoList:
+                if stu.ignore and enbaleIgnore:
+                    # 如果 要忽略 并且 启用忽略判断
+                    continue
+                stuList.append(stu)
+        return stuList
+
 
 class ClassroomDutyDao():
     @classmethod
