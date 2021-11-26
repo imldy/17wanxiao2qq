@@ -128,16 +128,30 @@ class DestUtil():
             dest.email = arg["email"]
         return dest
 
+
 class BotUtil():
     @classmethod
-    def parseDict(cls, arg: dict)->Bot:
+    def parseDict(cls, arg: dict) -> Bot:
         bot = Bot(arg["tag"])
         if arg["type"].lower() == Bot.MIRAI_API_HTTP_HTTP:
-            bot.type=Bot.MIRAI_API_HTTP_HTTP
+            bot.type = Bot.MIRAI_API_HTTP_HTTP
         if "qq_no" in arg:
             bot.qq_no = ["qq_no"]
         if "root_url" in arg:
             bot.root_url = ["root_url"]
         if "verify_key" in arg:
             bot.verify_key = ["verify_key"]
-        return  bot
+        return bot
+
+
+class StudentUtil():
+    @classmethod
+    def getStuNoListByStuList(stuList: list) -> list:
+        '''
+        根据学生对象列表，获取学生学号列表
+        :return:
+        '''
+        stuNoList = []
+        for stu in stuList:
+            stuNoList.append(stu.id)
+        return stuNoList
