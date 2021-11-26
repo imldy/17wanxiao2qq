@@ -3,6 +3,7 @@ class Task():
         self.id = id  # 任务ID
         self.name = name  # 任务名
         self.remind_text = remind_text  # 任务提醒语句，描述语句
+        self.remind_text_private_chat: str = None
         self.remind_type = None  # 提醒类型，简单的文本|需要at的
         self.dest = None  # 任务目的地，某个群或者某个QQ账号
         self.involve_crowd = None  # 消息中涉及到的人

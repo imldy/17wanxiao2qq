@@ -1,4 +1,7 @@
 from datetime import date, datetime, timezone, timedelta
+
+from mirai import MessageChain, At
+
 from beans import Student, Task, Dest, Crowd, WX_Account, Remind, Bot
 from dao import DestDao, CrowdDao
 from factory import BeansFactory
@@ -54,6 +57,8 @@ class TaskUtil():
         if "dest" in arg:
             dest: Dest = destDao.getDestByTag(arg["dest"])
             task.dest = dest
+        if "remind_text_private_chat" in arg:
+            task.remind_text_private_chat = arg["remind_text_private_chat"]
         # 处理涉及人群
         if "involve_crowd" in arg:
             crow = crowdDao.getCrowdByTag(arg["involve_crowd"])
