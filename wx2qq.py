@@ -110,6 +110,22 @@ class QQBot():
         msg = json.loads(resp.text)["msg"]
         return msg
 
+    def release(self):
+        '''
+        放session及其相关资源（Bot不会被释放） 不使用的Session应当被释放
+        长时间（30分钟）未使用的Session将自动释放，否则Session持续保存Bot收到的消息，将会导致内存泄露(开启websocket后将不会自动释放)
+        :param session_key:
+        :param qq:
+        :return:
+        '''
+        data = {
+            "sessionKey": self.session_key,
+            "qq": self.bot_qq
+        }
+        resp = requests.post("{}/release".format(self.root_url), json=data)
+        msg = json.loads(resp.text)["msg"]
+        return msg
+
     def send_temp_session_message(self, dest_qq, group, messageChain):
         data = {
             "sessionKey": self.session_key,
@@ -606,6 +622,9 @@ def start(health_checkin=False, one_day_three_detection=False
         print("开始提醒任务列表")
         for task_id in task_id_list:
             push_remind_text_to_group_by_task_id(conf, task_id, qqbot)
+
+    result = qqbot.release()
+    print("释放session及其相关资源：{}".format(result))
 
 
 def SCF_start(event, context):
