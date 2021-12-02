@@ -55,7 +55,7 @@ class WanXiao():
             "reportTime": "",
             "_search": "false",
             # "nd": 1631956327043,  # 截至时间
-            "limit": 50,
+            "limit": 300,
             "page": 1,
             "sidx": "",
             "order": "asc",
