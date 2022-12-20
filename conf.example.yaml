@@ -1,0 +1,110 @@
+verify_key: keykeykey  # mirai-api-http 接口验证 key
+root_url: "http://mirai-api-http.example.com:8081" # mirai-api-http http 接口地址
+bot_qq: 10000 # QQ Bot 账号，需要在 mirai console 中登录
+dest_group: 10086 # 提醒信息需要发送到的群
+wx_account: # https://reported.17wanxiao.com/login.html 账号，要求登陆时不弹验证码。
+  username: username
+  password: password
+one_day_three_detection:
+  remind_text: "【一日三检表】麻烦大家按时测温并如实填写，双周周末上交。💖🎉"
+dormitory_pre_clean:
+  remind_text: "【预提醒公寓卫生区】公寓卫生区明天由以下值日生打扫，请注意时间安排。"
+dormitory_clean:
+  remind_text: "【公寓卫生区】请值日生及时打扫，如正在打扫或打扫完成请忽略。"
+dormitory_sign:
+  remind_text: "【公寓卫生区】打扫完请及时找宿管签到，如已签到请忽略。"
+after_class_clean:
+  remind_text: "【教室&自习室卫生】课后请本周值日生对本次上课所使用的教室进行清理，卫生要求请看群文件。"
+after_night_lessons_clean:
+  remind_text: "【自习室卫生】晚自习结束了，请本周值日生对自习室进行清理，卫生要求请看群文件。"
+important_clean:
+  remind_text: "【自习室大扫除】大扫除马上开始，请本周值日生对自习室进行清理。学生会将于11:30-12:30检查，卫生要求请看群文件。"
+Bots:
+  - tag: main
+    type: mirai-api-http http
+    qq_no: 10000
+    root_url: "http://mirai-api-http.example.com:8081" # mirai-api-http http 接口地址
+    verify_key: keykeykey
+Destinations:
+  - tag: class-main
+    type: group
+    no: "891060000"
+  - tag: class-main-private-chat
+    type: private_chat # 私聊，可能参用群临时消息、好友消息、临时消息
+    no: "891060000" # 如果涉及到多人了，则本属性用于指定临时会话发起群聊
+  - tag: class-test
+    type: group
+    no: "675130000"
+  - tag: imldy
+    type: person
+    no: "2310810000"
+    email: 2310810000@qq.com
+Crowds:
+  - tag: wx-no-health-checkin
+    name: "未健康打卡人员"
+    wx_account:
+      username: username
+      password: password
+  - tag: boy-dormitory-cleaner
+    name: "男生公寓值日生"
+  - tag: girl-dormitory-cleaner
+    name: "女生公寓值日生"
+  - tag: classroom-cleaner
+    name: "教室&自习室值日生"
+
+Tasks:
+  - id: "01"
+    name: "健康打卡"
+    remind_text: "目前有{no}名同学未完成今日健康打卡，请同学们及时完成："
+    remind_text_private_chat: "请及时健康打卡"
+    involve_crowd: wx-no-health-checkin
+    dest: class-main
+  - id: "02"
+    name: "一日三检表"
+    remind_text: "请同学们按时测温并如实填写，双周周末上交。💖🎉"
+    dest: class-main
+    involve_crowd: class-all
+#  - id: "02-1"
+#    name: "上交一日三检表"
+#    remind_text: "今天晚自习上交一日三检表，请大家记得带上。
+#    上交前需要把右上角的“第 周”填上，本次是第7、8周。
+#    填好后在晚自习第一节课下课前交给宿舍长，请宿舍长收齐交给我。"
+  - id: "04"
+    name: "消杀通风-宿舍"
+    remind_text: "请各位同学进行宿舍消毒通风，并填写消杀记录表。"
+    dest: class-main
+    involve_crowd: class-all
+  - id: "05"
+    name: "消杀通风-自习室"
+    remind_text: "请本周教室&自习室值日生填写自习室消杀记录表。"
+    involve_crowd: classroom-cleaner
+    date: today
+    date_offset: 1
+  - id: "11"
+    name: "自习室卫生"
+    remind_text: "晚自习结束了，请本周值日生对自习室进行清理，经学生会人员确认合格后方可离开，卫生要求请看群文件。"
+    involve_crowd: classroom-cleaner
+    date: today
+  - id: "11-1"
+    name: "自习室大扫除"
+    remind_text: "大扫除马上开始，请本周值日生对自习室进行清理。学生会将于11:30-12:30检查，经学生会干部确认合格后方可离开，卫生要求请看群文件。"
+    involve_crowd: classroom-cleaner
+    date: today
+  - id: "12"
+    name: "公寓公共卫生区"
+    remind_text: "请值日生及时打扫公寓公共卫生区并于宿管处签到，卫生要求请看群文件，如正在进行或已完成请忽略。"
+    involve_crowd: boy-dormitory-cleaner+girl-dormitory-cleaner
+    date: today
+  - id: "12-1"
+    name: "预提醒公寓公共卫生区"
+    remind_text: "公寓卫生区明天由以下值日生打扫，请注意时间安排。"
+    involve_crowd: boy-dormitory-cleaner+girl-dormitory-cleaner
+    date: addday:1
+  - id: "13"
+    name: "课后卫生"
+    remind_text: "各位同学，下课后请带走垃圾杂物。本周值日生检查遗漏。"
+    remind_type: plain
+  - id: "21"
+    name: "健康打卡"
+    remind_text: "全部完成"
+    dest: admin:imldy
